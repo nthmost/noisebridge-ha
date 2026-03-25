@@ -242,7 +242,7 @@ class LightsHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("127.0.0.1", PORT), LightsHandler)
+    server = HTTPServer(("0.0.0.0", PORT), LightsHandler)
     print(f"Noisebridge Lights dashboard listening on port {PORT}")
     try:
         server.serve_forever()
