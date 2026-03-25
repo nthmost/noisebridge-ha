@@ -1,0 +1,5 @@
+.ha_env
+*.log
+__pycache__/
+*.pyc
+.env
