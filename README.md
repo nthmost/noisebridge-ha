@@ -1,6 +1,6 @@
 # noisebridge-ha
 
-Home Assistant configuration and scripts for Noisebridge hackerspace automation. Runs on **beyla** (RNA Lounge server) and controls Tuya smart plugs via a local HA instance.
+Home Assistant configuration and scripts for Noisebridge hackerspace automation. HA runs on a **Raspberry Pi 4** (clear plastic case, Mary Poppins server rack). The scripts in this repo run on **beyla** (RNA Lounge server) and interact with HA over the local network.
 
 ## How It Works
 
