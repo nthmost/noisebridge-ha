@@ -26,11 +26,15 @@ All assigned to **RNA Lounge** area.
 #### Data Flow
 
 1. **Upstream API:** `https://noisebell.extremist.software/status` — returns `open`/`closed` status
-2. **Poller:** `noisebridge_status_updater.py` polls the upstream API and updates HA entity `sensor.noisebridge_open_status`
-3. **Automation:** Triggered by a **webhook** (POST to webhook ID `-roWWM0JVCWSispwyHXlcKtjI`), not by the sensor state change
-   - When `trigger.json.status == 'open'` → turns ON the Open/Close switches
-   - When `trigger.json.status == 'closed'` → turns OFF the Open/Close switches
+2. **Poller:** `noisebridge_status_updater.py` polls the upstream API every 5 min (via cron) and updates HA entity `sensor.noisebridge_open_status`
+3. **Automation:** Triggered by **state change** on `sensor.noisebridge_open_status`
+   - When sensor changes to `open` → turns ON the Open/Close switches
+   - When sensor changes to `closed` → turns OFF the Open/Close switches
+   - **Retry logic:** Repeats up to 5 times (2 min apart) until all switches match the target state. Handles Tuya cloud / WiFi flakiness.
+   - **Mode: restart** — if status changes again mid-retry, the loop restarts with the new target
+   - Manual overrides are respected: retries only happen during the ~10 min window after a transition
 4. **Status server:** `noisebridge_status_server.py` runs on port 8099, exposing the HA sensor state over HTTP (no auth required)
+5. **Lights dashboard:** `nblights.py` runs on port 8098, showing switch states at `/nblights`
 
 ### Hallway Deco Lights Schedule (`automation.hallway_deco_lights_schedule`)
 

@@ -135,50 +135,76 @@ def main():
     print("STEP 2: Updating noisebell automation")
     print("=" * 60)
 
-    target_device_ids = list(OPEN_CLOSE_DEVICE_IDS.values())
+    open_close_entities = list(OPEN_CLOSE_DEVICE_IDS.keys())
 
     updated_config = {
         "id": "1774327685706",
         "alias": "noisebell",
-        "description": "",
+        "description": "Sync Open/Close lights with Noisebridge open/closed status. Retries up to 5 times over ~10 min to handle Tuya cloud/WiFi flakiness.",
         "triggers": [
             {
-                "trigger": "webhook",
-                "allowed_methods": ["POST"],
-                "local_only": False,
-                "webhook_id": "-roWWM0JVCWSispwyHXlcKtjI"
+                "trigger": "state",
+                "entity_id": "sensor.noisebridge_open_status",
+                "to": "open",
+                "id": "opened"
+            },
+            {
+                "trigger": "state",
+                "entity_id": "sensor.noisebridge_open_status",
+                "to": "closed",
+                "id": "closed"
             }
         ],
         "conditions": [],
         "actions": [
             {
-                "if": [
-                    {
-                        "condition": "template",
-                        "value_template": "{{ trigger.json.status == 'open' }}"
-                    }
-                ],
-                "then": [
-                    {"action": "switch.turn_on", "target": {"device_id": did}}
-                    for did in target_device_ids
-                ],
-                "else": [
-                    {
-                        "if": [
-                            {
-                                "condition": "template",
-                                "value_template": "{{ trigger.json.status == 'closed' }}"
-                            }
-                        ],
-                        "then": [
-                            {"action": "switch.turn_off", "target": {"device_id": did}}
-                            for did in target_device_ids
-                        ]
-                    }
-                ]
+                "repeat": {
+                    "while": [
+                        {
+                            "condition": "template",
+                            "value_template": "{{ repeat.index <= 5 }}"
+                        },
+                        {
+                            "condition": "template",
+                            "value_template": (
+                                "{% set target = 'on' if trigger.id == 'opened' else 'off' %}"
+                                "{{ not ("
+                                "states('switch.flaschentaschen_socket_1') == target and "
+                                "states('switch.salt_lamp_1_socket_1') == target and "
+                                "states('switch.mini_smart_plug_socket_1') == target"
+                                ") }}"
+                            )
+                        }
+                    ],
+                    "sequence": [
+                        {
+                            "choose": [
+                                {
+                                    "conditions": [{"condition": "trigger", "id": "opened"}],
+                                    "sequence": [
+                                        {
+                                            "action": "switch.turn_on",
+                                            "target": {"entity_id": open_close_entities}
+                                        }
+                                    ]
+                                },
+                                {
+                                    "conditions": [{"condition": "trigger", "id": "closed"}],
+                                    "sequence": [
+                                        {
+                                            "action": "switch.turn_off",
+                                            "target": {"entity_id": open_close_entities}
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {"delay": {"minutes": 2}}
+                    ]
+                }
             }
         ],
-        "mode": "single"
+        "mode": "restart"
     }
 
     print(f"\nUpdated config:\n{json.dumps(updated_config, indent=2)}")
@@ -188,9 +214,9 @@ def main():
 
     if result.get("ok"):
         print("SUCCESS: Noisebell automation updated!")
-        print("  - Removed: switch.mini_smart_plug_2_socket_1 (hallway deco)")
-        print("  - Added: switch.flaschentaschen_socket_1")
-        print("  - Kept: switch.salt_lamp_1_socket_1, switch.mini_smart_plug_socket_1")
+        print("  - State-triggered on sensor.noisebridge_open_status")
+        print("  - Retry loop: up to 5 attempts, 2 min apart")
+        print("  - Mode: restart (new status change cancels pending retries)")
     else:
         print("FAILED to update noisebell automation.")
 
