@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import urllib.request
+import urllib.error
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timezone
 
@@ -42,6 +43,92 @@ SWITCHES = [
     ("switch.mini_smart_plug_2_socket_1", "Hallway Deco Lights", "Scheduled"),
     ("switch.mini_smart_plug_5_socket_1", "Mini Smart Plug 5", "Other"),
 ]
+
+OPEN_CLOSE_SWITCHES = [eid for eid, _, g in SWITCHES if g == "Open/Close"]
+NB_API = "https://noisebell.extremist.software/status"
+SENSOR_STALE_MINUTES = 10
+TRANSITION_GRACE_MINUTES = 15
+
+
+def check_ha_health():
+    """Compare upstream status, HA sensor, and switch states. Return health verdict."""
+    now = datetime.now(timezone.utc)
+    problems = []
+
+    # 1. Fetch upstream Noisebridge status
+    try:
+        req = urllib.request.Request(NB_API)
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            upstream = json.loads(resp.read())
+        upstream_status = upstream["status"]  # "open" or "closed"
+    except Exception as e:
+        return {"status": "critical", "color": "red",
+                "message": f"Upstream API unreachable: {e}"}
+
+    # 2. Fetch HA sensor
+    try:
+        req = urllib.request.Request(
+            f"{HA_URL}/api/states/sensor.noisebridge_open_status",
+            headers={"Authorization": f"Bearer {HA_TOKEN}"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            sensor = json.loads(resp.read())
+        sensor_status = sensor["state"]
+        sensor_updated = sensor.get("last_updated", "")
+    except Exception as e:
+        return {"status": "critical", "color": "red",
+                "message": f"HA unreachable: {e}"}
+
+    # 3. Check sensor freshness
+    if sensor_updated:
+        try:
+            updated_dt = datetime.fromisoformat(sensor_updated)
+            age_min = (now - updated_dt).total_seconds() / 60
+            if age_min > SENSOR_STALE_MINUTES:
+                problems.append(f"sensor stale ({age_min:.0f}m old)")
+        except Exception:
+            pass
+
+    # 4. Check sensor matches upstream
+    if sensor_status != upstream_status:
+        problems.append(f"sensor={sensor_status} but upstream={upstream_status}")
+
+    # 5. Check switch states match sensor (only if no recent transition)
+    try:
+        sensor_changed = sensor.get("last_changed", "")
+        if sensor_changed:
+            changed_dt = datetime.fromisoformat(sensor_changed)
+            since_change_min = (now - changed_dt).total_seconds() / 60
+        else:
+            since_change_min = 999
+
+        if since_change_min > TRANSITION_GRACE_MINUTES:
+            states = get_switch_states()
+            expected = "on" if sensor_status == "open" else "off"
+            mismatched = []
+            for eid in OPEN_CLOSE_SWITCHES:
+                info = states.get(eid, {})
+                if info.get("state") not in (expected, "unavailable"):
+                    mismatched.append(eid.split(".")[1])
+            if mismatched:
+                problems.append(f"switches wrong: {', '.join(mismatched)} should be {expected}")
+    except Exception as e:
+        problems.append(f"switch check failed: {e}")
+
+    # Build result
+    if not problems:
+        return {"status": "ok", "color": "green",
+                "message": f"HA healthy — {upstream_status}",
+                "upstream": upstream_status, "sensor": sensor_status}
+
+    severity = "critical" if any(
+        "unreachable" in p or "stale" in p or "sensor=" in p for p in problems
+    ) else "warning"
+    color = "red" if severity == "critical" else "amber"
+
+    return {"status": severity, "color": color,
+            "message": "; ".join(problems),
+            "upstream": upstream_status, "sensor": sensor_status}
 
 
 def get_switch_states():
@@ -221,6 +308,9 @@ class LightsHandler(BaseHTTPRequestHandler):
                         "state": info.get("state", "unknown"),
                         "last_changed": info.get("last_changed", ""),
                     })
+                self._json_respond(200, result)
+            elif self.path == "/health/ha":
+                result = check_ha_health()
                 self._json_respond(200, result)
             elif self.path == "/health":
                 self._json_respond(200, {"status": "ok"})
