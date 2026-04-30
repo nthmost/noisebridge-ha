@@ -38,8 +38,8 @@ if not HA_TOKEN:
 # Switches to display: (entity_id, display_name, group)
 SWITCHES = [
     ("switch.flaschentaschen_socket_1", "Flaschentaschen", "Open/Close"),
-    ("switch.salt_lamp_1_socket_1", "Open Sign", "Open/Close"),
-    ("switch.mini_smart_plug_socket_1", "Beyla Lights", "Open/Close"),
+    ("switch.rna_sw1_3rd_reality_zigbee", "RNA SW1", "Open/Close"),
+    ("switch.rna_sw2_3rd_reality_zigbee", "RNA SW2", "Open/Close"),
     ("switch.mini_smart_plug_2_socket_1", "Hallway Deco Lights", "Scheduled"),
     ("switch.mini_smart_plug_5_socket_1", "Mini Smart Plug 5", "Other"),
 ]

@@ -17,7 +17,7 @@ sensor.noisebridge_open_status  (HA entity)
 noisebell automation            (HA automation with retry loop)
         |
         v
-Tuya smart plugs                (Flaschentaschen, Open Sign, Beyla Lights)
+Smart switches                  (Flaschentaschen, RNA SW1, RNA SW2)
 ```
 
 When Noisebridge opens or closes, the automation turns the Open/Close lights on or off. It retries up to 5 times over ~10 minutes to handle Tuya cloud drops and WiFi flakiness. Manual overrides are respected — retries only happen during the post-transition window.
@@ -35,7 +35,7 @@ A separate automation controls the **Hallway Deco Lights** on a sunset/sunrise s
 
 Pushes automation and switch group configs to HA via the REST API. Run this to set up or reset the HA automations:
 
-- **Open/Close switch group** — Flaschentaschen, Open Sign, Beyla Lights
+- **Open/Close switch group** — Flaschentaschen, RNA SW1, RNA SW2
 - **Noisebell automation** — state-triggered with retry loop (up to 5x, 2 min apart)
 - **Hallway Deco Lights Schedule** — sunset on / sunrise off
 
@@ -105,8 +105,8 @@ Syncs Open/Close lights with Noisebridge status.
 | Entity ID | Name | Group |
 |-----------|------|-------|
 | `switch.flaschentaschen_socket_1` | Flaschentaschen | Open/Close |
-| `switch.salt_lamp_1_socket_1` | Open Sign | Open/Close |
-| `switch.mini_smart_plug_socket_1` | Beyla Lights | Open/Close |
+| `switch.rna_sw1_3rd_reality_zigbee` | RNA SW1 | Open/Close |
+| `switch.rna_sw2_3rd_reality_zigbee` | RNA SW2 | Open/Close |
 | `switch.mini_smart_plug_2_socket_1` | Hallway Deco Lights | Scheduled |
 | `switch.mini_smart_plug_5_socket_1` | Mini Smart Plug 5 | Unavailable |
 

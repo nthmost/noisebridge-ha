@@ -30,15 +30,15 @@ if not HA_TOKEN:
     sys.exit(1)
 
 # Device ID mappings (from entity registry):
-# switch.flaschentaschen_socket_1 -> 87822c34b0c75a6e0bc00ac9b26ef18a
-# switch.mini_smart_plug_socket_1 -> 4f735523ee1fa7caf36e34f299b63fa3
-# switch.salt_lamp_1_socket_1     -> e5d9248fd29b1b30d6ecd887cd82eec6
-# switch.mini_smart_plug_2_socket_1 -> e00af537f194621eb3ecb69acfeffd90
+# switch.flaschentaschen_socket_1       -> 87822c34b0c75a6e0bc00ac9b26ef18a
+# switch.rna_sw1_3rd_reality_zigbee     -> 25f2ca03cd285dab3540f0d33c628852
+# switch.rna_sw2_3rd_reality_zigbee     -> f18d7feee419c55ba6d6fb8c3626efbb
+# switch.mini_smart_plug_2_socket_1     -> e00af537f194621eb3ecb69acfeffd90
 
 OPEN_CLOSE_DEVICE_IDS = {
     "switch.flaschentaschen_socket_1": "87822c34b0c75a6e0bc00ac9b26ef18a",
-    "switch.salt_lamp_1_socket_1": "e5d9248fd29b1b30d6ecd887cd82eec6",
-    "switch.mini_smart_plug_socket_1": "4f735523ee1fa7caf36e34f299b63fa3",
+    "switch.rna_sw1_3rd_reality_zigbee": "25f2ca03cd285dab3540f0d33c628852",
+    "switch.rna_sw2_3rd_reality_zigbee": "f18d7feee419c55ba6d6fb8c3626efbb",
 }
 
 HALLWAY_DEVICE_ID = "e00af537f194621eb3ecb69acfeffd90"  # mini_smart_plug_2_socket_1
@@ -170,8 +170,8 @@ def main():
                                 "{% set target = 'on' if trigger.id == 'opened' else 'off' %}"
                                 "{{ not ("
                                 "states('switch.flaschentaschen_socket_1') == target and "
-                                "states('switch.salt_lamp_1_socket_1') == target and "
-                                "states('switch.mini_smart_plug_socket_1') == target"
+                                "states('switch.rna_sw1_3rd_reality_zigbee') == target and "
+                                "states('switch.rna_sw2_3rd_reality_zigbee') == target"
                                 ") }}"
                             )
                         }

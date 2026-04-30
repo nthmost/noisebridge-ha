@@ -12,8 +12,8 @@ Switches that respond to Noisebridge open/closed status (via Noisebell).
 | Entity ID | Friendly Name | Notes |
 |-----------|--------------|-------|
 | `switch.flaschentaschen_socket_1` | Flaschentaschen | Tuya smart plug |
-| `switch.salt_lamp_1_socket_1` | Open sign | Tuya smart plug |
-| `switch.mini_smart_plug_socket_1` | Beyla Lights | Tuya smart plug |
+| `switch.rna_sw1_3rd_reality_zigbee` | RNA SW1 | 3rd Reality Zigbee switch |
+| `switch.rna_sw2_3rd_reality_zigbee` | RNA SW2 | 3rd Reality Zigbee switch |
 
 All assigned to **RNA Lounge** area.
 
@@ -56,4 +56,4 @@ All assigned to **RNA Lounge** area.
 
 - The noisebell automation uses webhook triggers, not sensor state triggers. The poller or an external caller must POST to the webhook for the automation to fire.
 - `switch.mini_smart_plug_5_socket_1` is unavailable — may need reconnection or may control an additional light not yet in any automation.
-- All "lights" are actually switch entities (Tuya smart plugs powering physical lights), not HA `light.*` entities.
+- Open/Close switches are a mix of Tuya smart plugs and 3rd Reality Zigbee switches.
