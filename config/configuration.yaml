@@ -131,11 +131,6 @@ input_text:
     max: 200
     icon: mdi:image
 
-  last_donation:
-    name: "Last Donation"
-    max: 120
-    icon: mdi:cash-multiple
-
 # ─── LiteBrite LED Marquee ─────────────────────────────────────────────────
 
 sensor:
@@ -197,6 +192,15 @@ sensor:
       - subgenre
       - tracks_available
       - tracks_pushed
+
+
+  - platform: rest
+    name: "Recent Donations"
+    resource: "http://10.21.1.44:8877/donations"
+    scan_interval: 10
+    value_template: "{{ value_json.count }}"
+    json_attributes:
+      - list
 
 
 input_select:

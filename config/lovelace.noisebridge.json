@@ -188,14 +188,9 @@
               "content": "## [donate.noisebridge.net](https://donate.noisebridge.net)\nSend the QR code to the FlaschenTaschen display, or share the link."
             },
             {
-              "type": "entities",
-              "title": "Last Donation",
-              "entities": [
-                {
-                  "entity": "input_text.last_donation",
-                  "name": "Last alert"
-                }
-              ]
+              "type": "markdown",
+              "title": "Recent Donations",
+              "content": "{% set donations = state_attr(sensor.recent_donations, list) %}\n{% if donations and donations | length > 0 %}\n{% for d in donations %}\n**{{ d.time }}** \u2014 {{ d.text }}\n{% endfor %}\n{% else %}\n*No recent donations yet*\n{% endif %}"
             },
             {
               "type": "horizontal-stack",
