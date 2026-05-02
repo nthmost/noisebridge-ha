@@ -174,7 +174,7 @@
             {
               "type": "markdown",
               "title": "Zikzak Streams",
-              "content": "{% set src = state_attr('sensor.zikzak_icecast', 'source') %}\n{% if src %}\n{% for s in src %}\n**{{ s.listenurl.split('/')[-1] }}** — {{ s.listeners }} listeners  \n{{ s.title }}  \n\n{% endfor %}\n{% else %}\n*No streams*\n{% endif %}"
+              "content": "{% set src = state_attr('sensor.zikzak_icecast', 'source') %}\n{% if src %}\n{% for s in src %}\n**{{ s.listenurl.split('/')[-1] }}** \u2014 {{ s.listeners }} listeners  \n{{ s.title }}  \n\n{% endfor %}\n{% else %}\n*No streams*\n{% endif %}"
             }
           ]
         },
@@ -186,6 +186,16 @@
             {
               "type": "markdown",
               "content": "## [donate.noisebridge.net](https://donate.noisebridge.net)\nSend the QR code to the FlaschenTaschen display, or share the link."
+            },
+            {
+              "type": "entities",
+              "title": "Last Donation",
+              "entities": [
+                {
+                  "entity": "input_text.last_donation",
+                  "name": "Last alert"
+                }
+              ]
             },
             {
               "type": "horizontal-stack",

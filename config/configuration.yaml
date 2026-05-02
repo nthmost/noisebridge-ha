@@ -131,6 +131,11 @@ input_text:
     max: 200
     icon: mdi:image
 
+  last_donation:
+    name: "Last Donation"
+    max: 120
+    icon: mdi:cash-multiple
+
 # ─── LiteBrite LED Marquee ─────────────────────────────────────────────────
 
 sensor:
@@ -193,6 +198,7 @@ sensor:
       - tracks_available
       - tracks_pushed
 
+
 input_select:
   knob_genre:
     name: "KNOB Genre"
@@ -244,6 +250,7 @@ input_select:
       - Cyan
       - Magenta
       - Orange
+
 
 input_number:
   ft_image_duration:
