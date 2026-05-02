@@ -1,0 +1,240 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# ─── KNOB Radio ───────────────────────────────────────────────────────────────
+
+rest_command:
+  knob_set_genre:
+    url: "http://10.21.1.44:8081/api/genre"
+    method: POST
+    content_type: "application/json"
+    payload: >-
+      {% if genre_sub is defined and genre_sub %}
+        {"genre": "{{ genre }}", "subgenre": "{{ genre_sub }}"}
+      {% else %}
+        {"genre": "{{ genre }}"}
+      {% endif %}
+
+  knob_clear_genre:
+    url: "http://10.21.1.44:8081/api/genre"
+    method: DELETE
+
+  knob_queue_track:
+    url: "http://10.21.1.44:8081/api/queue"
+    method: POST
+    content_type: "application/json"
+    payload: '{"search": "{{ search }}"}'
+
+  knob_queue_by_id:
+    url: "http://10.21.1.44:8081/api/queue"
+    method: POST
+    content_type: "application/json"
+    payload: '{"track_id": {{ track_id }}}'
+
+  knob_clear_queue:
+    url: "http://10.21.1.44:8081/api/queue"
+    method: DELETE
+
+  knob_skip:
+    url: "http://10.21.1.44:8081/api/skip"
+    method: POST
+
+  litebrite_set_text:
+    url: "http://10.21.0.80/text"
+    method: POST
+    content_type: "application/x-www-form-urlencoded"
+    payload: >-
+      text={{ message }}&color={{ color | default("rainbow") }}&scrolling={{ scrolling | default("true") }}
+
+  # ─── FlaschenTaschen ─────────────────────────────────────────────────────────
+
+  ft_display:
+    url: "http://10.21.1.44:8877/display"
+    method: POST
+    content_type: "application/json"
+    payload: >-
+      {"text": "{{ text }}", "layer": {{ layer|default(2) }},
+       "r": {{ r|default(255) }}, "g": {{ g|default(255) }},
+       "b": {{ b|default(255) }}, "duration": {{ duration|default(30) }}}
+
+  ft_image:
+    url: "http://10.21.1.44:8877/image"
+    method: POST
+    content_type: "application/json"
+    payload: >-
+      {"image": "{{ image }}", "layer": {{ layer|default(5) }},
+       "duration": {{ duration|default(0) }}}
+
+  ft_clear:
+    url: "http://10.21.1.44:8877/clear"
+    method: POST
+    content_type: "application/json"
+    payload: '{"layer": {{ layer|default(2) }}}'
+
+
+  ft_animation:
+    url: "http://10.21.1.44:8877/animation"
+    method: POST
+    content_type: "application/json"
+    payload: >-
+      {"name": "{{ name }}", "layer": {{ layer|default(5) }},
+       "duration": {{ duration|default(60) }}}
+
+  ft_scroll:
+    url: "http://10.21.1.44:8877/scroll"
+    method: POST
+    content_type: "application/json"
+    payload: >-
+      {"text": "{{ text }}", "layer": {{ layer|default(5) }},
+       "color": "{{ color|default('FFFFFF') }}",
+       "bg": "{{ bg|default('000000') }}",
+       "duration": {{ duration|default(30) }}}
+
+
+input_text:
+  ft_message:
+    name: "FT Message"
+    max: 120
+    icon: mdi:led-strip-variant
+
+  knob_search:
+    name: "KNOB Search"
+    max: 100
+    icon: mdi:magnify
+
+  ft_image_url:
+    name: "FT Image URL"
+    max: 200
+    icon: mdi:image
+
+# ─── LiteBrite LED Marquee ─────────────────────────────────────────────────
+
+sensor:
+  - platform: rest
+    name: "KNOB Now Playing"
+    resource: "http://10.21.1.44:8081/api/now-playing"
+    scan_interval: 5
+    value_template: >-
+      {% if value_json.artist and value_json.title %}
+        {{ value_json.artist }} - {{ value_json.title }}
+      {% elif value_json.title %}
+        {{ value_json.title }}
+      {% elif value_json.filename %}
+        {{ value_json.filename }}
+      {% else %}
+        Unknown
+      {% endif %}
+    json_attributes:
+      - artist
+      - title
+      - filename
+      - remaining
+      - remaining_fmt
+      - source
+      - scheduled_source
+      - listeners
+      - listener_peak
+      - genre_override
+      - queue_depth
+      - icecast_connected
+
+
+  - platform: rest
+    name: "Zikzak Icecast"
+    resource: "http://zikzak.local:8000/status-json.xsl"
+    scan_interval: 10
+    value_template: "{{ value_json.icestats.source | length }} streams"
+    json_attributes_path: "$.icestats"
+    json_attributes:
+      - source
+
+  - platform: rest
+    name: "KNOB Genre Override"
+    resource: "http://10.21.1.44:8081/api/genre"
+    scan_interval: 10
+    value_template: >-
+      {% if value_json.active %}
+        {% if value_json.subgenre %}
+          {{ value_json.genre }} / {{ value_json.subgenre }}
+        {% else %}
+          {{ value_json.genre }}
+        {% endif %}
+      {% else %}
+        None
+      {% endif %}
+    json_attributes:
+      - active
+      - genre
+      - subgenre
+      - tracks_available
+      - tracks_pushed
+
+input_select:
+  knob_genre:
+    name: "KNOB Genre"
+    options:
+      - "Off"
+      - "Bass"
+      - "Chill"
+      - "Electronic"
+      - "Hip-Hop"
+      - "Dub/Reggae"
+      - "Metal"
+      - "Punk"
+      - "Blues/Soul"
+      - "Jazz"
+      - "Classical"
+      - "Pop/Rock"
+    initial: "Off"
+    icon: mdi:music-box
+
+  ft_animation:
+    name: "FT Animation"
+    icon: mdi:animation-play
+    options:
+      - plasma
+      - matrix
+      - fractal
+      - maze
+      - life
+      - sierpinski
+      - blur-bolt
+      - blur-boxes
+      - blur-circles
+      - lines
+      - quilt
+      - words
+      - hack
+      - nb-logo
+      - random-dots
+
+  ft_text_color:
+    name: "FT Text Color"
+    icon: mdi:palette
+    options:
+      - White
+      - Red
+      - Green
+      - Blue
+      - Yellow
+      - Cyan
+      - Magenta
+      - Orange
+
+input_number:
+  ft_image_duration:
+    name: "FT Image Duration"
+    min: 5
+    max: 300
+    step: 5
+    initial: 30
+    unit_of_measurement: s
+    icon: mdi:timer

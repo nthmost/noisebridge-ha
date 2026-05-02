@@ -1,0 +1,69 @@
+ft_send_message:
+  alias: Send to FlaschenTaschen
+  icon: mdi:led-strip-variant
+  sequence:
+  - service: rest_command.ft_scroll
+    data:
+      text: '{{ states(''input_text.ft_message'') }}'
+      color: '{{ {''White'': ''FFFFFF'', ''Red'': ''FF0000'', ''Green'': ''00FF00'',
+        ''Blue'': ''0000FF'', ''Yellow'': ''FFFF00'', ''Cyan'': ''00FFFF'', ''Magenta'':
+        ''FF00FF'', ''Orange'': ''FF8800''}.get(states(''input_select.ft_text_color''),
+        ''FFFFFF'') }}'
+      duration: 60
+  - service: input_text.set_value
+    target:
+      entity_id: input_text.ft_message
+    data:
+      value: ''
+ft_launch_animation:
+  alias: Launch FT Animation
+  icon: mdi:animation-play
+  sequence:
+  - service: rest_command.ft_animation
+    data:
+      name: '{{ states(''input_select.ft_animation'') }}'
+      layer: 5
+      duration: 60
+ft_send_image:
+  alias: Send Image to FlaschenTaschen
+  icon: mdi:image-send
+  sequence:
+  - service: rest_command.ft_image_url
+    data:
+      url: '{{ states(''input_text.ft_image_url'') }}'
+      duration: '{{ states(''input_number.ft_image_duration'') | int }}'
+      layer: 5
+knob_set_genre_from_select:
+  alias: Set KNOB Genre
+  icon: mdi:music
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.knob_genre
+        state: 'Off'
+      sequence:
+      - service: rest_command.knob_clear_genre
+    default:
+    - service: rest_command.knob_set_genre
+      data:
+        genre: '{{ states(''input_select.knob_genre'') }}'
+knob_queue_search:
+  alias: Queue KNOB Track
+  icon: mdi:playlist-plus
+  sequence:
+  - service: rest_command.knob_queue_track
+    data:
+      search: '{{ states(''input_text.knob_search'') }}'
+  - service: input_text.set_value
+    target:
+      entity_id: input_text.knob_search
+    data:
+      value: ''
+ft_send_qr:
+  alias: 'FT: Send Donate QR'
+  sequence:
+  - data:
+      url: http://localhost:8877/qr.png
+      duration: 0
+    action: rest_command.ft_image_url
