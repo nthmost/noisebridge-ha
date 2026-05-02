@@ -1,0 +1,163 @@
+- alias: KNOB - Genre selector
+  id: knob_genre_selector
+  trigger:
+  - trigger: state
+    entity_id: input_select.knob_genre
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.knob_genre
+        state: 'Off'
+      sequence:
+      - action: rest_command.knob_clear_genre
+    default:
+    - action: rest_command.knob_set_genre
+      data:
+        genre: '{{ states(''input_select.knob_genre'') }}'
+- alias: KNOB - Sync genre dropdown from API
+  id: knob_genre_sync
+  trigger:
+  - trigger: state
+    entity_id: sensor.knob_genre_override
+  action:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.knob_genre
+    data:
+      option: "{% if states('sensor.knob_genre_override') == 'None' %}\n  Off\n{%
+        elif '/' in states('sensor.knob_genre_override') %}\n  {{ states('sensor.knob_genre_override').split('
+        / ')[0] }}\n{% else %}\n  {{ states('sensor.knob_genre_override') }}\n{% endif
+        %}"
+- id: '1774327685706'
+  alias: noisebell
+  description: Sync Open/Close lights with Noisebridge open/closed status. Retries
+    up to 5 times over ~10 min to handle flakiness.
+  triggers:
+  - trigger: state
+    entity_id: sensor.noisebridge_open_status
+    to: open
+    id: opened
+  - trigger: state
+    entity_id: sensor.noisebridge_open_status
+    to: closed
+    id: closed
+  conditions: []
+  actions:
+  - repeat:
+      while:
+      - condition: template
+        value_template: '{{ repeat.index <= 5 }}'
+      - condition: template
+        value_template: '{% set target = ''on'' if trigger.id == ''opened'' else ''off''
+          %}{{ not (states(''switch.flaschentaschen_socket_1'') == target and states(''switch.rna_sw1_3rd_reality_zigbee'')
+          == target and states(''switch.rna_sw2_3rd_reality_zigbee'') == target) }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: trigger
+            id: opened
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id:
+              - switch.flaschentaschen_socket_1
+              - switch.rna_sw1_3rd_reality_zigbee
+              - switch.rna_sw2_3rd_reality_zigbee
+        - conditions:
+          - condition: trigger
+            id: closed
+          sequence:
+          - action: switch.turn_off
+            target:
+              entity_id:
+              - switch.flaschentaschen_socket_1
+              - switch.rna_sw1_3rd_reality_zigbee
+              - switch.rna_sw2_3rd_reality_zigbee
+      - delay:
+          minutes: 2
+  mode: restart
+- id: noisebridge_status_webhook
+  alias: Noisebridge Status Webhook
+  description: Returns Noisebridge open/closed status via webhook
+  triggers:
+  - platform: webhook
+    webhook_id: noisebridge_status
+    allowed_methods:
+    - GET
+    - POST
+    local_only: false
+  actions:
+  - stop: done
+    response_variable: output
+  mode: single
+  variables:
+    output:
+      test: hello
+- id: '1774387860167'
+  alias: Hallway Deco Lights Schedule
+  description: Turns hallway deco lights on at sunset and off at sunrise
+  triggers:
+  - trigger: sun
+    event: sunset
+    id: sunset
+  - trigger: sun
+    event: sunrise
+    id: sunrise
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: sunset
+      sequence:
+      - action: switch.turn_on
+        target:
+          device_id: e00af537f194621eb3ecb69acfeffd90
+    - conditions:
+      - condition: trigger
+        id: sunrise
+      sequence:
+      - action: switch.turn_off
+        target:
+          device_id: e00af537f194621eb3ecb69acfeffd90
+  mode: single
+- id: '1774607700956'
+  alias: FlaschenTaschen Open/Close Display
+  description: Mooninites on FT + marquee message when Noisebridge opens.
+  triggers:
+  - trigger: state
+    entity_id: sensor.noisebridge_open_status
+    to: open
+    id: opened
+  - trigger: state
+    entity_id: sensor.noisebridge_open_status
+    to: closed
+    id: closed
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: opened
+      sequence:
+      - delay:
+          seconds: 30
+      - action: rest_command.ft_image
+        data:
+          image: iVBORw0KGgoAAAANSUhEUgAAAC0AAAAjCAIAAACPchS9AAABI0lEQVR4nO2WMRKCMBBFfxyPYAOFtTUeQ47jMTwOHkNqa4rYeIdY6DAhu0kWCJiCNxTJGsIz+UGBjRxRg54W31cm9tglnm8qQw/ht0y9GMTjf/AepjCmMOHKGh4AlFLRCvSYaAfhpo7S50MPuzPIOx/rs/d+0pJKtaDHpHz0yJKhqwZA2dYCj2mxF3h8JX7D/SpqioT4gNgSYZV553akRECF5JTGcwbF4wLgdb47bQo5t5XgCuIsg/0WttvuMDJN5DFAZF9828FMY23QIvmwVdr3s29XhxMrsZQHtRnczeV0QQ8AzfHmVOruyo70v9dTYG/Ej44fmcvvHPEoSZdWZLD58IUm2/VIR38uyra222t7jIJ4RM9toj/GMY90jMrpxkaIDxSxTd8AiCn2AAAAAElFTkSuQmCC
+          layer: 5
+          duration: 300
+      - action: rest_command.litebrite_set_text
+        data:
+          message: HACK teh PLANET!!!!111one
+          color: rainbow
+          scrolling: 'true'
+    - conditions:
+      - condition: trigger
+        id: closed
+      sequence:
+      - action: rest_command.ft_clear
+        data:
+          layer: 0
+  mode: single

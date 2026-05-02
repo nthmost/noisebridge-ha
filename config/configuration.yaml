@@ -99,6 +99,22 @@ rest_command:
        "duration": {{ duration|default(30) }}}
 
 
+  ft_qr:
+    url: "http://10.21.1.44:8877/ft/qr"
+    method: POST
+    content_type: application/json
+    payload: '{"url": "https://donate.noisebridge.net", "layer": 5, "duration": 0}'
+
+
+  ft_image_url:
+    url: "http://10.21.1.44:8877/image_url"
+    method: POST
+    content_type: application/json
+    payload: >-
+      {"url": "{{ url }}", "layer": {{ layer|default(5) }},
+       "duration": {{ duration|default(30) }}}
+
+
 input_text:
   ft_message:
     name: "FT Message"

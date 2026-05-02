@@ -61,9 +61,6 @@ knob_queue_search:
     data:
       value: ''
 ft_send_qr:
-  alias: 'FT: Send Donate QR'
+  alias: "FT: Send Donate QR"
   sequence:
-  - data:
-      url: http://localhost:8877/qr.png
-      duration: 0
-    action: rest_command.ft_image_url
+  - action: rest_command.ft_qr

@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.noisebridge",
+  "data": {
+    "config": {
+      "title": "Noisebridge",
+      "views": [
+        {
+          "title": "FlaschenTaschen",
+          "icon": "mdi:led-strip-variant",
+          "cards": [
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scrolling Message",
+                  "entities": [
+                    {
+                      "entity": "input_text.ft_message",
+                      "name": "Message"
+                    },
+                    {
+                      "entity": "input_select.ft_text_color",
+                      "name": "Color"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Send Message",
+                      "icon": "mdi:send",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.ft_send_message"
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Clear Display",
+                      "icon": "mdi:close-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "rest_command.ft_clear",
+                        "service_data": {
+                          "layer": 5
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Send Image",
+                  "entities": [
+                    {
+                      "entity": "input_text.ft_image_url",
+                      "name": "Image URL"
+                    },
+                    {
+                      "entity": "input_number.ft_image_duration",
+                      "name": "Duration"
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "Send Image",
+                  "icon": "mdi:image-send",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.ft_send_image"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Animations",
+                  "entities": [
+                    {
+                      "entity": "input_select.ft_animation",
+                      "name": "Animation"
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "name": "Launch Animation",
+                  "icon": "mdi:animation-play",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.ft_launch_animation"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "KNOB Radio",
+          "icon": "mdi:radio",
+          "cards": [
+            {
+              "type": "entities",
+              "title": "Now Playing",
+              "entities": [
+                {
+                  "entity": "sensor.knob_now_playing",
+                  "name": "Track"
+                },
+                {
+                  "entity": "sensor.knob_genre_override",
+                  "name": "Genre Override"
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Genre",
+                  "entities": [
+                    {
+                      "entity": "input_select.knob_genre",
+                      "name": "Genre"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Set Genre",
+                      "icon": "mdi:music",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.knob_set_genre_from_select"
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Clear Genre",
+                      "icon": "mdi:music-off",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "rest_command.knob_clear_genre"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Zikzak",
+          "icon": "mdi:television-play",
+          "cards": [
+            {
+              "type": "markdown",
+              "title": "Zikzak Streams",
+              "content": "{% set src = state_attr('sensor.zikzak_icecast', 'source') %}\n{% if src %}\n{% for s in src %}\n**{{ s.listenurl.split('/')[-1] }}** — {{ s.listeners }} listeners  \n{{ s.title }}  \n\n{% endfor %}\n{% else %}\n*No streams*\n{% endif %}"
+            }
+          ]
+        },
+        {
+          "title": "Donations",
+          "icon": "mdi:hand-coin-outline",
+          "path": "donations",
+          "cards": [
+            {
+              "type": "markdown",
+              "content": "## [donate.noisebridge.net](https://donate.noisebridge.net)\nSend the QR code to the FlaschenTaschen display, or share the link."
+            },
+            {
+              "type": "horizontal-stack",
+              "cards": [
+                {
+                  "type": "button",
+                  "name": "Show Donate QR",
+                  "icon": "mdi:qrcode",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.ft_send_qr"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "Clear FT",
+                  "icon": "mdi:close-circle-outline",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "rest_command.ft_clear",
+                    "service_data": {
+                      "layer": 5
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
