@@ -13,7 +13,7 @@ set -e
 
 HA_HOST="homeassistant.local"
 HA_PORT=2222
-HA_USER="root"
+HA_USER="hassio"
 JUMP="beyla"
 DEST="$(dirname "$0")/config"
 
