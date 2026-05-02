@@ -111,3 +111,20 @@ Syncs Open/Close lights with Noisebridge status.
 | `switch.mini_smart_plug_5_socket_1` | Mini Smart Plug 5 | Unavailable |
 
 See [homeassistant.md](homeassistant.md) for full device mappings and additional details.
+
+## Config Backup
+
+The `config/` directory holds snapshots of the live HA YAML files:
+- `configuration.yaml` — sensors, rest_commands, input helpers
+- `scripts.yaml` — FT and KNOB control scripts
+- `automations.yaml` — open/close and scheduled automations
+- `lovelace.noisebridge.json` — FT/KNOB/Zikzak control dashboard
+- `lovelace.rooms.json` — Rooms navigation dashboard
+
+### Running a Backup
+
+```bash
+./backup_ha_config.sh
+```
+
+Requires SSH access to HA via beyla (port 2222). See the script header for first-time SSH key setup instructions.
