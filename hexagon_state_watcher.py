@@ -60,6 +60,7 @@ MQTT_PASS = ha_config["MQTT_PASS"]
 
 STATE_TOPIC = "sp648e/wiresprite_hexagon/state"
 SET_TOPIC = "sp648e/wiresprite_hexagon/set"
+AVAILABILITY_TOPIC = "sp648e/wiresprite_hexagon/availability"
 EFFECT_FOR = {"open": "Rainbow Meteor", "closed": "Comet Red"}
 
 
@@ -116,15 +117,19 @@ def handle_state(payload_str):
 
 def main():
     # `-F %j` gives one JSON object per message: {"tst":..., "topic":..., "qos":..., "retain":..., "payloadlen":..., "payload":...}
+    # Subscribe to BOTH state and availability topics so we can characterize the
+    # underlying reconnect rate (availability transitions) alongside the
+    # state-OFF firings that we actually act on.
     cmd = [
         "mosquitto_sub",
         "-h", MQTT_HOST,
         "-u", MQTT_USER, "-P", MQTT_PASS,
         "-t", STATE_TOPIC,
+        "-t", AVAILABILITY_TOPIC,
         "-F", "%j",
         "-q", "1",
     ]
-    log(f"subscribing to {STATE_TOPIC} on {MQTT_HOST}")
+    log(f"subscribing to {STATE_TOPIC} + {AVAILABILITY_TOPIC} on {MQTT_HOST}")
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     try:
@@ -137,7 +142,19 @@ def main():
             except Exception:
                 log(f"unparseable line: {line!r}")
                 continue
-            handle_state(msg.get("payload", ""))
+
+            topic = msg.get("topic", "")
+            payload = msg.get("payload", "")
+            retain = msg.get("retain", 0)
+
+            if topic == AVAILABILITY_TOPIC:
+                # Just log; don't act. Each transition = one Pico MQTT bounce.
+                log(f"availability: {payload!r} (retain={retain})")
+            elif topic == STATE_TOPIC:
+                log(f"state: {payload!r} (retain={retain})")
+                handle_state(payload)
+            else:
+                log(f"unexpected topic {topic!r}: {payload!r}")
     finally:
         proc.terminate()
         try:
