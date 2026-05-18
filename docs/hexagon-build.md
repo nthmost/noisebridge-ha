@@ -197,14 +197,22 @@ If something gets stuck (USB CDC dies, `mpremote` reports `no device found` even
 - **One Pico in this batch had a chip-level USB CDC fault** — BOOTSEL worked but MicroPython USB CDC never enumerated post-flash. Hardware lottery. Have a spare.
 - **picotool isn't packaged for Ubuntu** — built from source on zikzak. Binary at `/usr/local/bin/picotool` (symlinked from `~/.local/picotool/picotool`); needs `sudo` (we didn't install the udev rules).
 
+## Known bug — Pico publishes spurious OFF on every MQTT reconnect
+
+The deployed `sp648e-controller/pico/mqtt.py` publishes `{"state":"OFF"}` to the state topic on every MQTT (re)connect, intended as a "known starting state" but actually flipping HA's view to OFF on every keepalive bounce. Observed firing every 45-90 seconds — roughly matching the 60s default MQTT keepalive interval.
+
+**Fix is committed in the public repo** ([dd7b7a7](https://github.com/nthmost/sp648e-controller/commit/dd7b7a7) + [8c59222](https://github.com/nthmost/sp648e-controller/commit/8c59222)) but **not yet deployed** to the Pico — it needs to be plugged into zikzak (or any Linux host with picotool + mpremote) for the redeploy.
+
+**Until then:** `hexagon_state_watcher.service` on beyla catches each spurious OFF and republishes the correct state directly to the state topic (not the set topic, so no BLE traffic and the LED is untouched). See [the band-aid memory note](../README.md#docs) and `hexagon_state_watcher.py` in the repo root.
+
 ## What's not done
 
+- **Deploy the queued mqtt.py fixes** to the Pico (next time the hardware is reachable) and remove the watcher band-aid (see its docstring for the teardown procedure)
 - **OTA firmware updates** for the Pico (would let us iterate without USB)
 - **Speed / length / direction** controls for effects (one-liners each, see uniled source)
 - **Audio sensitivity** for sound-reactive effects
 - **The other ~210 effects** we didn't include in the curated 17
-- **`sp648e-controller` is not yet in a git repo** — local on the Mac only. Should be extracted to `~/projects/git/sp648e-controller/` per the project-extraction convention.
-- **Effect speed isn't exposed in HA's MQTT discovery** even though HA's MQTT JSON light schema would accept it.
+- **Effect speed isn't exposed in HA's MQTT discovery** even though HA's MQTT JSON light schema would accept it
 
 ## References
 
