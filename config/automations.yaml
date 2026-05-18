@@ -72,7 +72,7 @@
             target:
               entity_id: light.hexagon
             data:
-              effect: Rainbow
+              effect: Rainbow Meteor
         - conditions:
           - condition: trigger
             id: closed
