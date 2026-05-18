@@ -11,9 +11,9 @@ Adding "smart" devices that talk MQTT to HA — Picos, ESP32s, custom controller
 
 ## The pattern
 
-1. **One HA user account**, shared across all IoT devices. Name it something obvious like `devices` or `mqtt-bridge`. Mark it as a regular user (not admin).
+1. **One HA user account**, shared across all IoT devices. Name it `wiresprite`. Mark it as a regular user (not admin).
 2. **One password**, stored in `~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env` on the master Mac, synced to relevant hosts.
-3. **Every IoT device** uses those same creds for its MQTT client.
+3. **Every IoT device** uses those same creds for its MQTT client. Individual devices can be named `wiresprite-<thing>` (e.g. `wiresprite-sp648e`, `wiresprite-doorbell`) so the family is obvious from any topic or log line.
 
 Tradeoffs accepted:
 - If any one device is compromised, an attacker has the MQTT creds for all of them. Acceptable for a hackerspace where the LAN is already semi-trusted and the blast radius is "weird LED behaviour".
@@ -37,6 +37,6 @@ Tradeoffs accepted:
 
 ## Rotating credentials
 
-1. Change the password on the `devices` user in HA (Settings → People → Users).
+1. Change the password on the `wiresprite` user in HA (Settings → People → Users).
 2. Update `~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env`.
 3. Push updated creds to every device that uses them (each device project should document its own redeploy step).
