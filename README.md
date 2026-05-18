@@ -20,9 +20,15 @@ noisebell automation            (HA automation with retry loop)
 Smart switches                  (Flaschentaschen, RNA SW1, RNA SW2)
 ```
 
-When Noisebridge opens or closes, the automation turns the Open/Close lights on or off. It retries up to 5 times over ~10 minutes to handle Tuya cloud drops and WiFi flakiness. Manual overrides are respected — retries only happen during the post-transition window.
+When Noisebridge opens or closes, the automation turns the Open/Close lights on or off (including the **Hexagon** at the front entrance, which plays `Rainbow Meteor` when open and switches to `Comet Red` when closed). It retries up to 5 times over ~10 minutes to handle Tuya cloud drops and WiFi flakiness. Manual overrides are respected — retries only happen during the post-transition window.
 
 A separate automation controls the **Hallway Deco Lights** on a sunset/sunrise schedule.
+
+## Docs
+
+- [`docs/hexagon-build.md`](docs/hexagon-build.md) — architecture, build notes, and gotchas for the front-entrance LED hexagon (Pico 2 W BLE bridge + MQTT + HA)
+- [`docs/iot-device-accounts.md`](docs/iot-device-accounts.md) — the `wiresprite` shared MQTT account pattern used by all NB IoT bridges
+- [`dashboards/lights.yaml`](dashboards/lights.yaml) — the `Lights` Lovelace dashboard config (room tabs, quick-pick color/effect tiles)
 
 ## Setup
 
