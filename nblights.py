@@ -35,16 +35,27 @@ if not HA_TOKEN:
     print("No HA_TOKEN found in .ha_env", file=sys.stderr)
     sys.exit(1)
 
-# Switches to display: (entity_id, display_name, group)
-SWITCHES = [
-    ("switch.flaschentaschen_socket_1", "Flaschentaschen", "Open/Close"),
-    ("switch.rna_sw1_3rd_reality_zigbee", "RNA SW1", "Open/Close"),
-    ("switch.rna_sw2_3rd_reality_zigbee", "RNA SW2", "Open/Close"),
-    ("switch.mini_smart_plug_2_socket_1", "Hallway Deco Lights", "Scheduled"),
-    ("switch.mini_smart_plug_5_socket_1", "Mini Smart Plug 5", "Other"),
+# Entities to display: (entity_id, display_name, group, kind)
+# kind = "switch" (binary on/off) or "light" (state + brightness + color/effect).
+ENTITIES = [
+    # Open/Close — track with the noisebell automation
+    ("switch.rna_sw1_3rd_reality_zigbee",    "RNA SW1",            "Open/Close", "switch"),
+    ("switch.rna_sw2_3rd_reality_zigbee",    "RNA SW2",            "Open/Close", "switch"),
+    ("light.beyla_govee_light_bars",         "Govee Light Bars",   "Open/Close", "light"),
+    ("light.rgbicww_floor_lamp_fa12",        "Floor Tube Lamp",    "Open/Close", "light"),
+
+    # Front Entrance — the hexagon panel via the Pico BLE bridge
+    ("light.hexagon",                        "Hexagon",            "Front Entrance", "light"),
+
+    # Scheduled (sunset/sunrise)
+    ("switch.mini_smart_plug_2_socket_1",    "Hallway Deco Lights", "Scheduled", "switch"),
+
+    # Other / parked
+    ("switch.flaschentaschen_socket_1",      "Flaschentaschen",    "Other", "switch"),
+    ("switch.mini_smart_plug_5_socket_1",    "Mini Smart Plug 5",  "Other", "switch"),
 ]
 
-OPEN_CLOSE_SWITCHES = [eid for eid, _, g in SWITCHES if g == "Open/Close"]
+OPEN_CLOSE_SWITCHES = [eid for eid, _, g, k in ENTITIES if g == "Open/Close" and k == "switch"]
 NB_API = "https://noisebell.extremist.software/status"
 SENSOR_STALE_MINUTES = 10
 TRANSITION_GRACE_MINUTES = 15
@@ -131,8 +142,8 @@ def check_ha_health():
             "upstream": upstream_status, "sensor": sensor_status}
 
 
-def get_switch_states():
-    """Fetch all switch entity states from HA."""
+def get_entity_states():
+    """Fetch switch + light entity states from HA, including light attributes."""
     req = urllib.request.Request(
         f"{HA_URL}/api/states",
         headers={"Authorization": f"Bearer {HA_TOKEN}"},
@@ -143,13 +154,22 @@ def get_switch_states():
     state_map = {}
     for entity in all_states:
         eid = entity.get("entity_id", "")
-        if eid.startswith("switch."):
-            state_map[eid] = {
-                "state": entity.get("state", "unknown"),
-                "friendly_name": entity.get("attributes", {}).get("friendly_name", eid),
-                "last_changed": entity.get("last_changed", ""),
-            }
+        if not (eid.startswith("switch.") or eid.startswith("light.")):
+            continue
+        attrs = entity.get("attributes", {})
+        state_map[eid] = {
+            "state": entity.get("state", "unknown"),
+            "friendly_name": attrs.get("friendly_name", eid),
+            "last_changed": entity.get("last_changed", ""),
+            "brightness": attrs.get("brightness"),       # 0-255 or None
+            "rgb_color": attrs.get("rgb_color"),         # [r,g,b] or None
+            "effect": attrs.get("effect"),               # string or None
+        }
     return state_map
+
+
+# Back-compat alias for /api/states callers that hit the old function name.
+get_switch_states = get_entity_states
 
 
 def render_dashboard(state_map):
@@ -158,7 +178,7 @@ def render_dashboard(state_map):
 
     rows = []
     current_group = None
-    for entity_id, name, group in SWITCHES:
+    for entity_id, name, group, kind in ENTITIES:
         if group != current_group:
             current_group = group
             rows.append(f'<tr class="group-header"><td colspan="3">{group}</td></tr>')
@@ -170,10 +190,19 @@ def render_dashboard(state_map):
             # Trim microseconds for display
             last_changed = last_changed.replace("T", " ")[:19]
 
+        # Indicator: lit dot, or for ON lights, a swatch of their actual color.
         if state == "on":
-            indicator = '<span class="led on"></span>'
-            state_text = "ON"
             row_class = "state-on"
+            state_text = "ON"
+            if kind == "light":
+                rgb = info.get("rgb_color")
+                if rgb:
+                    swatch_color = f"rgb({rgb[0]},{rgb[1]},{rgb[2]})"
+                    indicator = f'<span class="led on" style="background:{swatch_color};box-shadow:0 0 8px {swatch_color}"></span>'
+                else:
+                    indicator = '<span class="led on"></span>'
+            else:
+                indicator = '<span class="led on"></span>'
         elif state == "off":
             indicator = '<span class="led off"></span>'
             state_text = "OFF"
@@ -183,9 +212,22 @@ def render_dashboard(state_map):
             state_text = state.upper()
             row_class = "state-unavailable"
 
+        # Extra detail line for lights that are ON
+        detail = ""
+        if kind == "light" and state == "on":
+            bits = []
+            brightness = info.get("brightness")
+            if brightness is not None:
+                bits.append(f"{int(brightness * 100 / 255)}%")
+            effect = info.get("effect")
+            if effect:
+                bits.append(effect)
+            if bits:
+                detail = f'<div class="detail">{" &middot; ".join(bits)}</div>'
+
         rows.append(
             f'<tr class="{row_class}">'
-            f'<td>{indicator} {name}</td>'
+            f'<td>{indicator} {name}{detail}</td>'
             f'<td class="state-cell">{state_text}</td>'
             f'<td class="time-cell">{last_changed}</td>'
             f'</tr>'
@@ -268,6 +310,12 @@ def render_dashboard(state_map):
   .led.unavailable {{
     background: #555;
   }}
+  .detail {{
+    color: #888;
+    font-size: 0.7rem;
+    margin-top: 0.15rem;
+    padding-left: 1.3rem;
+  }}
   .footer {{
     margin-top: 1.5rem;
     color: #555;
@@ -290,24 +338,30 @@ class LightsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             if self.path.rstrip("/") in ("", "/index.html"):
-                states = get_switch_states()
+                states = get_entity_states()
                 html = render_dashboard(states)
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(html.encode())
             elif self.path == "/api/states":
-                states = get_switch_states()
+                states = get_entity_states()
                 result = []
-                for entity_id, name, group in SWITCHES:
+                for entity_id, name, group, kind in ENTITIES:
                     info = states.get(entity_id, {})
-                    result.append({
+                    row = {
                         "entity_id": entity_id,
                         "name": name,
                         "group": group,
+                        "kind": kind,
                         "state": info.get("state", "unknown"),
                         "last_changed": info.get("last_changed", ""),
-                    })
+                    }
+                    if kind == "light":
+                        row["brightness"] = info.get("brightness")
+                        row["rgb_color"] = info.get("rgb_color")
+                        row["effect"] = info.get("effect")
+                    result.append(row)
                 self._json_respond(200, result)
             elif self.path == "/health/ha":
                 result = check_ha_health()
