@@ -72,10 +72,12 @@ def get_sensor():
         return json.loads(resp.read())["state"]
 
 
-def publish(payload):
+def publish_state_correction(payload):
+    """Publish DIRECTLY to the state topic (retained) — corrects HA's view of the
+    light without sending any command to the Pico, so the LED is never touched."""
     subprocess.run(
         ["mosquitto_pub", "-h", MQTT_HOST, "-u", MQTT_USER, "-P", MQTT_PASS,
-         "-t", SET_TOPIC, "-m", json.dumps(payload)],
+         "-t", STATE_TOPIC, "-m", json.dumps(payload), "-r"],
         check=True, timeout=10,
     )
 
@@ -100,9 +102,14 @@ def handle_state(payload_str):
         log(f"sensor in unexpected state {sensor!r}; skipping correction")
         return
 
-    log(f"hexagon went OFF (sensor={sensor}); republishing state=ON effect={effect!r}")
+    # CRUCIAL: publish to STATE topic (not SET) — corrects HA's view without
+    # triggering any BLE command to the Pico. The physical LED stays in whatever
+    # last-commanded state (which the noisebell automation ensures matches the
+    # sensor). Going through SET would cause the Pico to re-issue a BLE write
+    # that might restart the effect animation — visible as a flicker/reset.
+    log(f"spurious OFF on state topic; republishing ON+{effect!r} to state (no BLE write)")
     try:
-        publish({"state": "ON", "effect": effect})
+        publish_state_correction({"state": "ON", "effect": effect})
     except Exception as e:
         log(f"correction publish failed: {e!r}")
 
