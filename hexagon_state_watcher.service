@@ -1,0 +1,16 @@
+[Unit]
+Description=Hexagon state watcher (TEMPORARY band-aid for sp648e mqtt OFF bug)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nthmost
+ExecStart=/usr/bin/python3 /home/nthmost/projects/noisebridge-ha/hexagon_state_watcher.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/hexagon_state_watcher.log
+StandardError=append:/var/log/hexagon_state_watcher.log
+
+[Install]
+WantedBy=multi-user.target
