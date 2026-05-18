@@ -31,6 +31,11 @@ import os
 import subprocess
 import sys
 import urllib.request
+from datetime import datetime
+
+
+def log(msg):
+    print(f"{datetime.now().isoformat(timespec='seconds')} {msg}", flush=True)
 
 
 HA_ENV = os.environ.get("HA_ENV_FILE", os.path.join(os.path.dirname(__file__), ".ha_env"))
@@ -79,7 +84,7 @@ def handle_state(payload_str):
     try:
         payload = json.loads(payload_str)
     except Exception:
-        print(f"unparseable state payload: {payload_str!r}", flush=True)
+        log(f"unparseable state payload: {payload_str!r}")
         return
     if payload.get("state") != "OFF":
         return  # ON state is fine, nothing to correct
@@ -87,20 +92,19 @@ def handle_state(payload_str):
     try:
         sensor = get_sensor()
     except Exception as e:
-        print(f"HA sensor fetch failed: {e!r}", flush=True)
+        log(f"HA sensor fetch failed: {e!r}")
         return
 
     effect = EFFECT_FOR.get(sensor)
     if effect is None:
-        print(f"sensor in unexpected state {sensor!r}; skipping correction", flush=True)
+        log(f"sensor in unexpected state {sensor!r}; skipping correction")
         return
 
-    print(f"hexagon went OFF (sensor={sensor}); republishing state=ON effect={effect!r}",
-          flush=True)
+    log(f"hexagon went OFF (sensor={sensor}); republishing state=ON effect={effect!r}")
     try:
         publish({"state": "ON", "effect": effect})
     except Exception as e:
-        print(f"correction publish failed: {e!r}", flush=True)
+        log(f"correction publish failed: {e!r}")
 
 
 def main():
@@ -113,7 +117,7 @@ def main():
         "-F", "%j",
         "-q", "1",
     ]
-    print(f"subscribing to {STATE_TOPIC} on {MQTT_HOST}", flush=True)
+    log(f"subscribing to {STATE_TOPIC} on {MQTT_HOST}")
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     try:
@@ -124,7 +128,7 @@ def main():
             try:
                 msg = json.loads(line)
             except Exception:
-                print(f"unparseable line: {line!r}", flush=True)
+                log(f"unparseable line: {line!r}")
                 continue
             handle_state(msg.get("payload", ""))
     finally:
@@ -134,7 +138,7 @@ def main():
         except subprocess.TimeoutExpired:
             proc.kill()
     rc = proc.returncode or 1
-    print(f"mosquitto_sub exited rc={rc}; surfacing for systemd to restart", flush=True)
+    log(f"mosquitto_sub exited rc={rc}; surfacing for systemd to restart")
     return rc
 
 
