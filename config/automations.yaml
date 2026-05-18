@@ -91,8 +91,7 @@
             target:
               entity_id: light.hexagon
             data:
-              effect: Solid Color
-              rgb_color: [255, 0, 0]
+              effect: Comet Red
       - delay:
           minutes: 2
   mode: restart
