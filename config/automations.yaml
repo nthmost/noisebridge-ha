@@ -64,6 +64,9 @@
               - switch.flaschentaschen_socket_1
               - switch.rna_sw1_3rd_reality_zigbee
               - switch.rna_sw2_3rd_reality_zigbee
+          - action: light.turn_on
+            target:
+              entity_id: light.beyla_govee_light_bars
         - conditions:
           - condition: trigger
             id: closed
@@ -74,6 +77,9 @@
               - switch.flaschentaschen_socket_1
               - switch.rna_sw1_3rd_reality_zigbee
               - switch.rna_sw2_3rd_reality_zigbee
+          - action: light.turn_off
+            target:
+              entity_id: light.beyla_govee_light_bars
       - delay:
           minutes: 2
   mode: restart
