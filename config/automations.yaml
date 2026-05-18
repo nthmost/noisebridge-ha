@@ -50,7 +50,7 @@
         value_template: '{{ repeat.index <= 5 }}'
       - condition: template
         value_template: '{% set target = ''on'' if trigger.id == ''opened'' else ''off''
-          %}{{ not (states(''switch.flaschentaschen_socket_1'') == target and states(''switch.rna_sw1_3rd_reality_zigbee'')
+          %}{{ not (states(''switch.rna_sw1_3rd_reality_zigbee'')
           == target and states(''switch.rna_sw2_3rd_reality_zigbee'') == target) }}'
       sequence:
       - choose:
@@ -61,12 +61,18 @@
           - action: switch.turn_on
             target:
               entity_id:
-              - switch.flaschentaschen_socket_1
               - switch.rna_sw1_3rd_reality_zigbee
               - switch.rna_sw2_3rd_reality_zigbee
           - action: light.turn_on
             target:
-              entity_id: light.beyla_govee_light_bars
+              entity_id:
+              - light.beyla_govee_light_bars
+              - light.rgbicww_floor_lamp_fa12
+          - action: light.turn_on
+            target:
+              entity_id: light.hexagon
+            data:
+              effect: Rainbow
         - conditions:
           - condition: trigger
             id: closed
@@ -74,12 +80,19 @@
           - action: switch.turn_off
             target:
               entity_id:
-              - switch.flaschentaschen_socket_1
               - switch.rna_sw1_3rd_reality_zigbee
               - switch.rna_sw2_3rd_reality_zigbee
           - action: light.turn_off
             target:
-              entity_id: light.beyla_govee_light_bars
+              entity_id:
+              - light.beyla_govee_light_bars
+              - light.rgbicww_floor_lamp_fa12
+          - action: light.turn_on
+            target:
+              entity_id: light.hexagon
+            data:
+              effect: Solid Color
+              rgb_color: [255, 0, 0]
       - delay:
           minutes: 2
   mode: restart
