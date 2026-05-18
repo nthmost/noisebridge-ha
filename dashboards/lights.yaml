@@ -94,10 +94,210 @@ views:
       - type: grid
         cards:
           - type: heading
-            heading: Front entrance fixtures
+            heading: Hexagon
           - type: light
             entity: light.hexagon
             name: Hexagon
+      - type: grid
+        cards:
+          - type: heading
+            heading: Quick colors
+        column_span: 4
+      - type: grid
+        column_span: 4
+        cards:
+          - &color_tile
+            type: tile
+            entity: light.hexagon
+            name: Red
+            color: red
+            icon: mdi:circle
+            hide_state: true
+            vertical: true
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [255, 0, 0]
+          - <<: *color_tile
+            name: Orange
+            color: orange
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [255, 128, 0]
+          - <<: *color_tile
+            name: Yellow
+            color: yellow
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [255, 255, 0]
+          - <<: *color_tile
+            name: Green
+            color: green
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [0, 255, 0]
+          - <<: *color_tile
+            name: Cyan
+            color: cyan
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [0, 255, 255]
+          - <<: *color_tile
+            name: Blue
+            color: blue
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [0, 0, 255]
+          - <<: *color_tile
+            name: Purple
+            color: purple
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [128, 0, 255]
+          - <<: *color_tile
+            name: White
+            color: white
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+                rgb_color: [255, 255, 255]
+      - type: grid
+        cards:
+          - type: heading
+            heading: Effects
+        column_span: 4
+      - type: grid
+        column_span: 4
+        cards:
+          - &effect_tile
+            type: tile
+            entity: light.hexagon
+            name: Rainbow
+            icon: mdi:looks
+            color: indigo
+            hide_state: true
+            vertical: true
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Rainbow
+          - <<: *effect_tile
+            name: Rainbow Wave
+            icon: mdi:wave
+            color: light-blue
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Rainbow Wave
+          - <<: *effect_tile
+            name: Sound Spectrum
+            icon: mdi:music
+            color: pink
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: 'Sound: Spectrum'
+          - <<: *effect_tile
+            name: Sound Pulse
+            icon: mdi:heart-pulse
+            color: deep-purple
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: 'Sound: Pulse'
+          - <<: *effect_tile
+            name: Fire
+            icon: mdi:fire
+            color: deep-orange
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Fire Red/Yellow
+          - <<: *effect_tile
+            name: Meteor
+            icon: mdi:meteor
+            color: grey
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Meteor White
+          - <<: *effect_tile
+            name: Solid
+            icon: mdi:lightbulb
+            color: amber
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_on
+              target:
+                entity_id: light.hexagon
+              data:
+                effect: Solid Color
+          - <<: *effect_tile
+            name: 'OFF'
+            icon: mdi:power
+            color: black
+            tap_action:
+              action: perform-action
+              perform_action: light.turn_off
+              target:
+                entity_id: light.hexagon
+              data: {}
 
 # --- ROOM TEMPLATE (copy when a room gets its first light) ---
 #  - title: Kitchen
