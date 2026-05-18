@@ -1,0 +1,113 @@
+# Noisebridge "Lights" dashboard.
+# Stock HA cards only, no HACS dependencies.
+#
+# Import:
+#   1. HA UI → Settings → Dashboards → "+ Add Dashboard"
+#   2. "New dashboard from scratch" → Title: "Lights", icon: mdi:lightbulb-multiple
+#   3. Open the new dashboard, top-right ⋮ menu → "Edit dashboard"
+#   4. Top-right ⋮ menu (inside editor) → "Raw configuration editor"
+#   5. Replace contents with this file's body (everything below the "---" line)
+#   6. Save
+#
+# Tabs grow as more rooms get lights — see the bottom of this file for the
+# pattern to copy-paste when adding a new room.
+---
+title: Lights
+views:
+  - title: All
+    path: all
+    icon: mdi:lightbulb-multiple
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: All rooms
+          - type: tile
+            entity: light.beyla_govee_light_bars
+            name: Govee Bars (RNA Lounge)
+          - type: tile
+            entity: light.rgbicww_floor_lamp_fa12
+            name: Floor Tube Lamp (RNA Lounge)
+          - type: tile
+            entity: light.hexagon
+            name: Hexagon (Front Entrance)
+
+  - title: RNA Lounge
+    path: rna-lounge
+    icon: mdi:music
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Main fixtures
+          - type: light
+            entity: light.beyla_govee_light_bars
+            name: Govee Light Bars
+          - type: light
+            entity: light.rgbicww_floor_lamp_fa12
+            name: Floor Tube Lamp
+      - type: grid
+        cards:
+          - type: heading
+            heading: Govee bar segments
+          - type: entities
+            show_header_toggle: false
+            entities:
+              - entity: light.beyla_govee_light_bars_segment_1
+                name: Segment 1
+              - entity: light.beyla_govee_light_bars_segment_2
+                name: Segment 2
+              - entity: light.beyla_govee_light_bars_segment_3
+                name: Segment 3
+              - entity: light.beyla_govee_light_bars_segment_4
+                name: Segment 4
+              - entity: light.beyla_govee_light_bars_segment_5
+                name: Segment 5
+              - entity: light.beyla_govee_light_bars_segment_6
+                name: Segment 6
+              - entity: light.beyla_govee_light_bars_segment_7
+                name: Segment 7
+              - entity: light.beyla_govee_light_bars_segment_8
+                name: Segment 8
+              - entity: light.beyla_govee_light_bars_segment_9
+                name: Segment 9
+              - entity: light.beyla_govee_light_bars_segment_10
+                name: Segment 10
+              - entity: light.beyla_govee_light_bars_segment_11
+                name: Segment 11
+              - entity: light.beyla_govee_light_bars_segment_12
+                name: Segment 12
+              - entity: light.beyla_govee_light_bars_segment_13
+                name: Segment 13
+              - entity: light.beyla_govee_light_bars_segment_14
+                name: Segment 14
+              - entity: light.beyla_govee_light_bars_segment_15
+                name: Segment 15
+
+  - title: Front Entrance
+    path: front-entrance
+    icon: mdi:door
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Front entrance fixtures
+          - type: light
+            entity: light.hexagon
+            name: Hexagon
+
+# --- ROOM TEMPLATE (copy when a room gets its first light) ---
+#  - title: Kitchen
+#    path: kitchen
+#    icon: mdi:fridge
+#    type: sections
+#    sections:
+#      - type: grid
+#        cards:
+#          - type: heading
+#            heading: Kitchen fixtures
+#          - type: light
+#            entity: light.your_new_light
