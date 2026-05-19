@@ -73,6 +73,7 @@
               entity_id: light.hexagon
             data:
               effect: Rainbow Meteor
+              brightness: 255
         - conditions:
           - condition: trigger
             id: closed
@@ -92,6 +93,7 @@
               entity_id: light.hexagon
             data:
               effect: Comet Red
+              brightness: 255
       - delay:
           minutes: 2
   mode: restart
