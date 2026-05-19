@@ -172,6 +172,47 @@
           "icon": "mdi:television-play",
           "cards": [
             {
+              "type": "entities",
+              "title": "Audio Output (3.5mm jack)",
+              "entities": [
+                {
+                  "entity": "select.zikzak_audio",
+                  "name": "Source"
+                }
+              ]
+            },
+            {
+              "type": "horizontal-stack",
+              "cards": [
+                {
+                  "type": "button",
+                  "name": "CH1",
+                  "icon": "mdi:numeric-1-box",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "select.select_option",
+                    "service_data": {
+                      "entity_id": "select.zikzak_audio",
+                      "option": "ch1"
+                    }
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "KNOB",
+                  "icon": "mdi:radio",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "select.select_option",
+                    "service_data": {
+                      "entity_id": "select.zikzak_audio",
+                      "option": "knob"
+                    }
+                  }
+                }
+              ]
+            },
+            {
               "type": "markdown",
               "title": "Zikzak Streams",
               "content": "{% set src = state_attr('sensor.zikzak_icecast', 'source') %}\n{% if src %}\n{% for s in src %}\n**{{ s.listenurl.split('/')[-1] }}** \u2014 {{ s.listeners }} listeners  \n{{ s.title }}  \n\n{% endfor %}\n{% else %}\n*No streams*\n{% endif %}"
