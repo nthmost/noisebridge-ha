@@ -8,7 +8,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 # Load HA config from .ha_env
-HA_ENV = os.environ.get("HA_ENV_FILE", os.path.join(os.path.dirname(__file__), ".ha_env"))
+HA_ENV = "/home/nthmost/.claude/projects/-home-nthmost-projects-sysadmin/.ha_env"
 ha_config = {}
 with open(HA_ENV) as f:
     for line in f:
@@ -17,6 +17,7 @@ with open(HA_ENV) as f:
             line = line[7:]
         if "=" in line and not line.startswith("#") and not line.startswith("function"):
             key, _, val = line.partition("=")
+            # Strip quotes
             val = val.strip('"').strip("'")
             if val:
                 ha_config[key] = val
@@ -25,7 +26,7 @@ HA_URL = ha_config.get("HA_URL", "http://homeassistant.local:8123")
 HA_TOKEN = ha_config.get("HA_TOKEN", "")
 
 if not HA_TOKEN:
-    print("No HA_TOKEN found in .ha_env", file=sys.stderr)
+    print("No HA_TOKEN found", file=sys.stderr)
     sys.exit(1)
 
 NB_API = "https://noisebell.extremist.software/status"

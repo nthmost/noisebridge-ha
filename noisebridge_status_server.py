@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 PORT = int(os.environ.get("NB_STATUS_PORT", 8099))
 
 # Load HA config
-HA_ENV = os.environ.get("HA_ENV_FILE", os.path.join(os.path.dirname(__file__), ".ha_env"))
+HA_ENV = "/home/nthmost/.claude/projects/-home-nthmost-projects-sysadmin/.ha_env"
 ha_config = {}
 with open(HA_ENV) as f:
     for line in f:
@@ -89,6 +89,7 @@ class StatusHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def log_message(self, format, *args):
+        # Quieter logging
         pass
 
 

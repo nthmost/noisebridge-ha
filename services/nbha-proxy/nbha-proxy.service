@@ -1,0 +1,12 @@
+[Unit]
+Description=HA Proxy (socat TCP forwarder to Raspberry Pi)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/socat TCP-LISTEN:8124,fork,reuseaddr TCP:10.21.0.43:8123
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

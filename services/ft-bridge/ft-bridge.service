@@ -1,0 +1,16 @@
+[Unit]
+Description=FlaschenTaschen HTTP bridge
+After=network.target
+
+[Service]
+Type=simple
+User=nthmost
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/nthmost/ft_bridge.py --port 8877
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/nthmost/logs/ft_bridge.log
+StandardError=append:/home/nthmost/logs/ft_bridge.log
+
+[Install]
+WantedBy=multi-user.target

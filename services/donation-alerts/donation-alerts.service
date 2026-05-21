@@ -1,0 +1,15 @@
+[Unit]
+Description=Noisebridge donation alerts → FlaschenTaschen
+After=network-online.target ft-bridge.service
+Wants=network-online.target
+
+[Service]
+User=nthmost
+ExecStart=/usr/bin/python3 /home/nthmost/ft_donation_alerts.py
+Restart=always
+RestartSec=30
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/home/nthmost/.secrets/donate_alerts.env
+
+[Install]
+WantedBy=multi-user.target

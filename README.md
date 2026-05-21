@@ -90,6 +90,10 @@ Apache config: `/etc/apache2/sites-enabled/mediawiki.conf`
 
 Public access via nthmost.com is proxied over WireGuard from zephyr (10.100.0.1) to beyla (10.100.0.2). Config on zephyr: `/etc/apache2/sites-enabled/nthmost.com-le-ssl.conf`
 
+## services/ subtree
+
+Additional long-running services (FlaschenTaschen stack, keypad daemon, HA TCP proxy) live under [`services/`](services/) — one subdir per service, each holding the script + systemd unit + companion config. These are deployed on beyla today but aren't beyla-specific. See [services/README.md](services/README.md) for the inventory.
+
 ## HA Automations
 
 ### Noisebell (`automation.noisebell`)

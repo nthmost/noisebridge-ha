@@ -1,0 +1,13 @@
+[Unit]
+Description=Noisebridge Status API Server
+After=network.target
+
+[Service]
+Type=simple
+User=nthmost
+ExecStart=/usr/bin/python3 /home/nthmost/projects/sysadmin/noisebridge_status_server.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

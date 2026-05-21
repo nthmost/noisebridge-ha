@@ -1,0 +1,24 @@
+[Unit]
+Description=Keypad Home Assistant Webhook Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/nthmost/projects/claude_sandbox/keypad-venv/bin/python -u /home/nthmost/projects/claude_sandbox/keypad_daemon.py
+WorkingDirectory=/home/nthmost/projects/claude_sandbox
+Restart=on-failure
+RestartSec=5
+
+# Needs root for /dev/input access and device grab
+User=root
+
+# Hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ReadOnlyPaths=/home/nthmost/projects/claude_sandbox
+
+[Install]
+WantedBy=multi-user.target

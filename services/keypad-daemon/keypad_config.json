@@ -1,0 +1,90 @@
+{
+  "ha_base_url": "http://homeassistant.local:8123",
+  "device_name": "2.4G Wireless Keyboard",
+  "key_map": {
+    "KEY_KP0": {
+      "webhook": "keypad_0",
+      "label": "Numpad 0"
+    },
+    "KEY_KP1": {
+      "webhook": "keypad_1",
+      "label": "Numpad 1"
+    },
+    "KEY_KP2": {
+      "webhook": "keypad_2",
+      "label": "Numpad 2"
+    },
+    "KEY_KP3": {
+      "webhook": "keypad_3",
+      "label": "Numpad 3"
+    },
+    "KEY_KP4": {
+      "webhook": "keypad_4",
+      "label": "Numpad 4"
+    },
+    "KEY_KP5": {
+      "webhook": "keypad_5",
+      "label": "Numpad 5"
+    },
+    "KEY_KP6": {
+      "webhook": "keypad_6",
+      "label": "Numpad 6"
+    },
+    "KEY_KP7": {
+      "webhook": "keypad_7",
+      "label": "Numpad 7"
+    },
+    "KEY_KP8": {
+      "webhook": "keypad_8",
+      "label": "Numpad 8"
+    },
+    "KEY_KP9": {
+      "webhook": "keypad_9",
+      "label": "Numpad 9"
+    },
+    "KEY_KPENTER": {
+      "webhook": "keypad_enter",
+      "label": "Numpad Enter"
+    },
+    "KEY_KPPLUS": {
+      "webhook": "keypad_plus",
+      "label": "Numpad +"
+    },
+    "KEY_KPMINUS": {
+      "webhook": "keypad_minus",
+      "label": "Numpad -"
+    },
+    "KEY_KPASTERISK": {
+      "webhook": "keypad_star",
+      "label": "Numpad *"
+    },
+    "KEY_KPSLASH": {
+      "webhook": "keypad_slash",
+      "label": "Numpad /"
+    },
+    "KEY_KPDOT": {
+      "webhook": "keypad_dot",
+      "label": "Numpad ."
+    },
+    "KEY_NUMLOCK": {
+      "webhook": "keypad_numlock",
+      "label": "Num Lock"
+    },
+    "KEY_BACKSPACE": {
+      "webhook": "keypad_backspace",
+      "label": "Backspace"
+    },
+    "DONUT": {
+      "webhook": "keypad_donut",
+      "label": "Donut"
+    },
+    "DIAL_CW": {
+      "webhook": "keypad_dial_cw",
+      "label": "Dial CW"
+    },
+    "DIAL_CCW": {
+      "webhook": "keypad_dial_ccw",
+      "label": "Dial CCW"
+    }
+  }
+}
