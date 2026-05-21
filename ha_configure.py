@@ -2,43 +2,23 @@
 """Configure Home Assistant: create switch group, update noisebell, create hallway automation."""
 
 import json
-import os
-import sys
 import time
 import urllib.request
 import urllib.error
 
-# Load HA config from .ha_env
-HA_ENV = os.environ.get("HA_ENV_FILE", os.path.join(os.path.dirname(__file__), ".ha_env"))
-ha_config = {}
-with open(HA_ENV) as f:
-    for line in f:
-        line = line.strip()
-        if line.startswith("export "):
-            line = line[7:]
-        if "=" in line and not line.startswith("#") and not line.startswith("function"):
-            key, _, val = line.partition("=")
-            val = val.strip('"').strip("'")
-            if val:
-                ha_config[key] = val
-
-HA_TOKEN = ha_config.get("HA_TOKEN", "")
-REST_URL = ha_config.get("HA_URL", "http://homeassistant.local:8123")
-
-if not HA_TOKEN:
-    print("No HA_TOKEN found in .ha_env", file=sys.stderr)
-    sys.exit(1)
+HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIzNDhjMjNlMGQzMTA0YWY1YWE2NGNmYTJjNTAzOTNmYyIsImlhdCI6MTc3NDMzMzE2NSwiZXhwIjoyMDg5NjkzMTY1fQ.KmrfxTXS1yHkkGg0HB4PEaS0nHH8K-S9ZhCiRikwBLo"
+REST_URL = "http://10.21.0.43:8123"
 
 # Device ID mappings (from entity registry):
-# switch.flaschentaschen_socket_1       -> 87822c34b0c75a6e0bc00ac9b26ef18a
-# switch.rna_sw1_3rd_reality_zigbee     -> 25f2ca03cd285dab3540f0d33c628852
-# switch.rna_sw2_3rd_reality_zigbee     -> f18d7feee419c55ba6d6fb8c3626efbb
-# switch.mini_smart_plug_2_socket_1     -> e00af537f194621eb3ecb69acfeffd90
+# switch.flaschentaschen_socket_1 -> 87822c34b0c75a6e0bc00ac9b26ef18a
+# switch.mini_smart_plug_socket_1 -> 4f735523ee1fa7caf36e34f299b63fa3
+# switch.salt_lamp_1_socket_1     -> e5d9248fd29b1b30d6ecd887cd82eec6
+# switch.mini_smart_plug_2_socket_1 -> e00af537f194621eb3ecb69acfeffd90
 
 OPEN_CLOSE_DEVICE_IDS = {
     "switch.flaschentaschen_socket_1": "87822c34b0c75a6e0bc00ac9b26ef18a",
-    "switch.rna_sw1_3rd_reality_zigbee": "25f2ca03cd285dab3540f0d33c628852",
-    "switch.rna_sw2_3rd_reality_zigbee": "f18d7feee419c55ba6d6fb8c3626efbb",
+    "switch.salt_lamp_1_socket_1": "e5d9248fd29b1b30d6ecd887cd82eec6",
+    "switch.mini_smart_plug_socket_1": "4f735523ee1fa7caf36e34f299b63fa3",
 }
 
 HALLWAY_DEVICE_ID = "e00af537f194621eb3ecb69acfeffd90"  # mini_smart_plug_2_socket_1
@@ -68,6 +48,7 @@ def call_service(domain, service, data=None, target=None):
         payload.update(data)
     if target:
         payload["target"] = target
+    # Use /api/services/<domain>/<service>
     return rest_request("POST", f"/api/services/{domain}/{service}", payload if payload else {})
 
 
@@ -79,13 +60,17 @@ def main():
     print("STEP 1: Creating 'Open/Close' switch group")
     print("=" * 60)
 
+    # Try creating a switch group helper via the REST API
+    # The HA helper config endpoint
     open_close_entities = [
         "switch.flaschentaschen_socket_1",
         "switch.salt_lamp_1_socket_1",
         "switch.mini_smart_plug_socket_1"
     ]
 
+    # Approach 1: Try POST to /api/config/helpers to create a switch group
     print("\nAttempt 1: POST /api/config/config_entries/flow")
+    # Switch group uses the "switch" platform from the "group" integration
     result = rest_request("POST", "/api/config/config_entries/flow", {
         "handler": "group",
         "show_advanced_options": False,
@@ -96,10 +81,13 @@ def main():
         flow_id = result["body"].get("flow_id")
         if flow_id:
             print(f"  Flow started: {flow_id}")
+            # Step through the config flow
+            # First step: select group type
             body = result["body"]
             print(f"  Step type: {body.get('type')}, step_id: {body.get('step_id')}")
             print(f"  Schema: {json.dumps(body.get('data_schema', []), indent=2)[:500]}")
 
+            # Select "switch" as the group type
             result2 = rest_request("POST", f"/api/config/config_entries/flow/{flow_id}", {
                 "group_type": "switch"
             })
@@ -112,6 +100,7 @@ def main():
                 print(f"  Step: {step_id}")
 
                 if body2.get("type") == "form":
+                    # Fill in the switch group details
                     result3 = rest_request("POST", f"/api/config/config_entries/flow/{flow_id2}", {
                         "name": "Open/Close",
                         "entities": open_close_entities,
@@ -127,6 +116,10 @@ def main():
                     print("\n  SUCCESS: Switch group created at step 2!")
     else:
         print(f"  Failed. Trying alternative...")
+        # Approach 2: Try via group integration REST API
+        # The group integration in HA creates groups via configuration
+        # We can try using input_boolean or direct group configuration
+        pass
 
     # =============================================
     # STEP 2: Update noisebell automation
@@ -135,76 +128,56 @@ def main():
     print("STEP 2: Updating noisebell automation")
     print("=" * 60)
 
-    open_close_entities = list(OPEN_CLOSE_DEVICE_IDS.keys())
+    # The current automation has 3 devices in both "then" (open) and "else" (close) branches.
+    # Device e00af537f194621eb3ecb69acfeffd90 is mini_smart_plug_2 (hallway deco) - REMOVE
+    # Need to ADD device 87822c34b0c75a6e0bc00ac9b26ef18a (flaschentaschen) - which was NOT in the current config!
+    # Current devices: e00af537 (plug2/hallway), 4f7355 (plug1), e5d924 (salt_lamp)
+    # Target devices: 87822c (flaschentaschen), 4f7355 (plug1), e5d924 (salt_lamp)
+
+    target_device_ids = list(OPEN_CLOSE_DEVICE_IDS.values())
 
     updated_config = {
         "id": "1774327685706",
         "alias": "noisebell",
-        "description": "Sync Open/Close lights with Noisebridge open/closed status. Retries up to 5 times over ~10 min to handle Tuya cloud/WiFi flakiness.",
+        "description": "",
         "triggers": [
             {
-                "trigger": "state",
-                "entity_id": "sensor.noisebridge_open_status",
-                "to": "open",
-                "id": "opened"
-            },
-            {
-                "trigger": "state",
-                "entity_id": "sensor.noisebridge_open_status",
-                "to": "closed",
-                "id": "closed"
+                "trigger": "webhook",
+                "allowed_methods": ["POST"],
+                "local_only": False,
+                "webhook_id": "-roWWM0JVCWSispwyHXlcKtjI"
             }
         ],
         "conditions": [],
         "actions": [
             {
-                "repeat": {
-                    "while": [
-                        {
-                            "condition": "template",
-                            "value_template": "{{ repeat.index <= 5 }}"
-                        },
-                        {
-                            "condition": "template",
-                            "value_template": (
-                                "{% set target = 'on' if trigger.id == 'opened' else 'off' %}"
-                                "{{ not ("
-                                "states('switch.flaschentaschen_socket_1') == target and "
-                                "states('switch.rna_sw1_3rd_reality_zigbee') == target and "
-                                "states('switch.rna_sw2_3rd_reality_zigbee') == target"
-                                ") }}"
-                            )
-                        }
-                    ],
-                    "sequence": [
-                        {
-                            "choose": [
-                                {
-                                    "conditions": [{"condition": "trigger", "id": "opened"}],
-                                    "sequence": [
-                                        {
-                                            "action": "switch.turn_on",
-                                            "target": {"entity_id": open_close_entities}
-                                        }
-                                    ]
-                                },
-                                {
-                                    "conditions": [{"condition": "trigger", "id": "closed"}],
-                                    "sequence": [
-                                        {
-                                            "action": "switch.turn_off",
-                                            "target": {"entity_id": open_close_entities}
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {"delay": {"minutes": 2}}
-                    ]
-                }
+                "if": [
+                    {
+                        "condition": "template",
+                        "value_template": "{{ trigger.json.status == 'open' }}"
+                    }
+                ],
+                "then": [
+                    {"action": "switch.turn_on", "target": {"device_id": did}}
+                    for did in target_device_ids
+                ],
+                "else": [
+                    {
+                        "if": [
+                            {
+                                "condition": "template",
+                                "value_template": "{{ trigger.json.status == 'closed' }}"
+                            }
+                        ],
+                        "then": [
+                            {"action": "switch.turn_off", "target": {"device_id": did}}
+                            for did in target_device_ids
+                        ]
+                    }
+                ]
             }
         ],
-        "mode": "restart"
+        "mode": "single"
     }
 
     print(f"\nUpdated config:\n{json.dumps(updated_config, indent=2)}")
@@ -214,12 +187,13 @@ def main():
 
     if result.get("ok"):
         print("SUCCESS: Noisebell automation updated!")
-        print("  - State-triggered on sensor.noisebridge_open_status")
-        print("  - Retry loop: up to 5 attempts, 2 min apart")
-        print("  - Mode: restart (new status change cancels pending retries)")
+        print("  - Removed: switch.mini_smart_plug_2_socket_1 (hallway deco)")
+        print("  - Added: switch.flaschentaschen_socket_1")
+        print("  - Kept: switch.salt_lamp_1_socket_1, switch.mini_smart_plug_socket_1")
     else:
         print("FAILED to update noisebell automation.")
 
+    # Reload automations
     print("\nReloading automations...")
     reload_result = call_service("automation", "reload")
     print(f"  Reload: {json.dumps(reload_result, indent=2)[:200]}")
@@ -301,6 +275,7 @@ def main():
     else:
         print("FAILED to create hallway automation.")
 
+    # Reload automations again
     print("\nReloading automations...")
     reload_result = call_service("automation", "reload")
     print(f"  Reload: {json.dumps(reload_result, indent=2)[:200]}")
@@ -310,6 +285,7 @@ def main():
     print("VERIFICATION")
     print("=" * 60)
 
+    # Check noisebell
     result = rest_request("GET", "/api/config/automation/config/1774327685706")
     if result.get("ok"):
         devices_in_then = []
@@ -322,6 +298,7 @@ def main():
         print(f"  Hallway deco (should be ABSENT): {'PRESENT - BAD' if hallway_present else 'ABSENT - GOOD'}")
         print(f"  Flaschentaschen (should be PRESENT): {'PRESENT - GOOD' if flasch_present else 'ABSENT - BAD'}")
 
+    # Check hallway automation
     result = rest_request("GET", f"/api/config/automation/config/{new_auto_id}")
     if result.get("ok"):
         print(f"\nHallway Deco Lights Schedule: EXISTS (id={new_auto_id})")
@@ -329,6 +306,7 @@ def main():
     else:
         print(f"\nHallway Deco Lights Schedule: NOT FOUND")
 
+    # Check states for all automations
     states = rest_request("GET", "/api/states")
     if states.get("ok"):
         autos = [s for s in states["body"] if s["entity_id"].startswith("automation.")]

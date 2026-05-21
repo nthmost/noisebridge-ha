@@ -28,6 +28,7 @@ A separate automation controls the **Hallway Deco Lights** on a sunset/sunrise s
 
 - [`docs/hexagon-build.md`](docs/hexagon-build.md) — architecture, build notes, and gotchas for the front-entrance LED hexagon (Pico 2 W BLE bridge + MQTT + HA)
 - [`docs/iot-device-accounts.md`](docs/iot-device-accounts.md) — the `wiresprite` shared MQTT account pattern used by all NB IoT bridges
+- [`docs/front_hall_hex_lights.md`](docs/front_hall_hex_lights.md) — HA setup for the front-hall hexagon (SP648E BLE controller, MQTT entity, effect picker)
 - [`dashboards/lights.yaml`](dashboards/lights.yaml) — the `Lights` Lovelace dashboard config (room tabs, quick-pick color/effect tiles)
 
 ## Setup
@@ -44,6 +45,14 @@ Pushes automation and switch group configs to HA via the REST API. Run this to s
 - **Open/Close switch group** — Flaschentaschen, RNA SW1, RNA SW2
 - **Noisebell automation** — state-triggered with retry loop (up to 5x, 2 min apart)
 - **Hallway Deco Lights Schedule** — sunset on / sunrise off
+
+### ha-bt-scan.py
+
+WebSocket client that asks HA for nearby bluetooth devices and prints the result. Useful when wiring up a new BLE device and you need to confirm HA can see it. Reads `HA_URL` and `HA_TOKEN` from env.
+
+### ir-learn.sh
+
+Guided IR-code learner for the Broadlink RM4 mini (`remote.ir_blaster_1` in HA). Prompts you to press each remote button, captures the learned code, and stores it on HA so the code can later be played back from automations or scripts.
 
 ### noisebridge_status_updater.py
 
