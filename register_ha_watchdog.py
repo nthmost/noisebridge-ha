@@ -64,7 +64,7 @@ wf_ha_watchdog = {
                         "color": "${check_ha.output.response.body.color}",
                         "_meta": {
                             "label": "HA Status",
-                            "section": "NOISEBRIDGE",
+                            "section": "NB INFRA",
                         },
                     },
                 }
