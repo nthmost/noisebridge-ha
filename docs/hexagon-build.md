@@ -8,7 +8,6 @@ Built 2026-05-17/18 as a one-night project.
 
 - **In HA:** an entity `light.hexagon` in the `Front Entrance` area. Standard light controls (on/off, brightness, RGB color, effect dropdown with 17 named effects).
 - **In the lights dashboard** (`http://10.21.0.43:8123/nb-lights/`, or as the **Lights** entry in HA's sidebar): a Hexagon panel with color presets, effect quick-picks, and a live color swatch.
-- **In the public status page** (`https://nthmost.com/nblights/`): the hexagon appears alongside switches with its current color swatch, brightness, and effect name.
 - **On the wall:** the hexagon panel runs `Rainbow Meteor` whenever Noisebridge is **open**, and switches to `Comet Red` when **closed** (via the existing `noisebell` automation).
 
 ## The hardware
@@ -31,19 +30,12 @@ Built 2026-05-17/18 as a one-night project.
    │      │ BLE                │  light.hexagon   │  │
    │      ▼                    │  noisebell       │  │
    │   ┌─────────────┐         │  automation      │  │
-   │   │ SP648E      │         └────────┬─────────┘  │
-   │   │ (hexagon    │                  │            │
-   │   │  panel)     │                  │ REST       │
-   │   └─────────────┘                  ▼            │
-   │                            ┌──────────────────┐ │
-   │                            │ beyla            │ │
-   │                            │ nblights.py:8098 │ │
-   │                            └────────┬─────────┘ │
-   │                                     │            │
-   └─────────────────────────────────────┼────────────┘
-                                         │ Apache proxy
-                                         ▼
-                       https://nthmost.com/nblights/
+   │   │ SP648E      │         └──────────────────┘  │
+   │   │ (hexagon    │                               │
+   │   │  panel)     │                               │
+   │   └─────────────┘                               │
+   │                                                  │
+   └──────────────────────────────────────────────────┘
 ```
 
 ### Components
@@ -55,7 +47,6 @@ Built 2026-05-17/18 as a one-night project.
 | MQTT broker | HA's Mosquitto add-on | HA Pi 4 (10.21.0.43:1883), one shared `wiresprite` account for all IoT bridges |
 | HA entity + dashboards | `nb-lights` dashboard | this repo: `dashboards/lights.yaml` |
 | HA automation | `noisebell` (open/close lights) | this repo: `config/automations.yaml` |
-| Public status page | `nblights.py` | this repo, runs on beyla:8098, reverse-proxied via zephyr |
 
 ### Topic / endpoint reference
 
@@ -72,7 +63,6 @@ Built 2026-05-17/18 as a one-night project.
   - `POST /brightness/<0-255>`
   - `POST /color/<r>/<g>/<b>[/<level>]`
   - `POST /effect/<URL-encoded name>`
-- **Status page:** `https://nthmost.com/nblights/`, JSON at `/nblights/api/states`
 
 ## The MQTT account convention
 
@@ -115,10 +105,6 @@ The existing `noisebell` automation triggers on `sensor.noisebridge_open_status`
 - **closed →** `light.turn_on light.hexagon effect: "Comet Red"` (still ON — the hexagon is the first thing people see, so it stays visibly lit even when the space is closed)
 
 The hexagon is idempotent under the existing retry-while loop (the loop re-fires all commands every 2 min until switches confirm their target state — the hexagon just re-receives the same effect).
-
-### nblights status page
-
-`nblights.py` (on beyla, port 8098, proxied via zephyr) now shows lights alongside switches. For light entities it pulls `brightness`, `rgb_color`, and `effect` attributes from HA and renders a colored swatch + detail row. Layout grouped by Open/Close → Front Entrance → Scheduled → Other.
 
 ## How to operate it
 

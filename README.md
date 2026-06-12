@@ -74,25 +74,10 @@ HTTP server (port 8099) exposing Noisebridge open/closed status from HA. No auth
 
 **systemd:** `noisebridge-status.service` (if configured)
 
-### nblights.py
-
-Lights dashboard showing real-time on/off state of all HA-controlled switches. Dark theme, auto-refreshes every 15s.
-
-| Endpoint | Response |
-|----------|----------|
-| `GET /` | HTML dashboard |
-| `GET /api/states` | JSON switch states |
-| `GET /health` | Health check |
-
-**systemd:** `nblights.service`
-**Local URL:** http://beyla.local/nblights
-**Public URL:** https://nthmost.com/nblights/
-
 ## Services on beyla
 
 | Service | Port | Proxied at |
 |---------|------|------------|
-| `nblights.service` | 8098 | `/nblights` (Apache) |
 | `noisebridge_status_server.py` | 8099 | — |
 
 Apache config: `/etc/apache2/sites-enabled/mediawiki.conf`
