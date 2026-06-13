@@ -18,8 +18,8 @@ from datetime import datetime, timezone
 
 PORT = int(os.environ.get("NB_STATUS_PORT", 8099))
 
-# Load HA config
-HA_ENV = "/home/nthmost/.claude/projects/-home-nthmost-projects-sysadmin/.ha_env"
+# Load HA config (set HA_ENV env var to override)
+HA_ENV = os.environ.get("HA_ENV", os.path.expanduser("~/.ha_env"))
 ha_config = {}
 with open(HA_ENV) as f:
     for line in f:

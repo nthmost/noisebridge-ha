@@ -80,9 +80,6 @@ HTTP server (port 8099) exposing Noisebridge open/closed status from HA. No auth
 |---------|------|------------|
 | `noisebridge_status_server.py` | 8099 | — |
 
-Apache config: `/etc/apache2/sites-enabled/mediawiki.conf`
-
-Public access via nthmost.com is proxied over WireGuard from zephyr (10.100.0.1) to beyla (10.100.0.2). Config on zephyr: `/etc/apache2/sites-enabled/nthmost.com-le-ssl.conf`
 
 ## services/ subtree
 

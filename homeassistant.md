@@ -1,8 +1,6 @@
 # Home Assistant Setup — homeassistant.local
 
 **Host:** homeassistant.local (10.21.0.43), port 8123
-**API Token:** stored in `/home/nthmost/.claude/projects/-home-nthmost-projects-sysadmin/.ha_env`
-
 ## Switch Groups
 
 ### Open/Close

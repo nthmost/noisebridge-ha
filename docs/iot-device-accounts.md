@@ -12,7 +12,7 @@ Adding "smart" devices that talk MQTT to HA — Picos, ESP32s, custom controller
 ## The pattern
 
 1. **One HA user account**, shared across all IoT devices. Name it `wiresprite`. Mark it as a regular user (not admin).
-2. **One password**, stored in `~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env` on the master Mac, synced to relevant hosts.
+2. **One password**, stored in `~/.secrets/ha-noisebridge-mqtt.env` on the master Mac, synced to relevant hosts.
 3. **Every IoT device** uses those same creds for its MQTT client. Individual devices can be named `wiresprite-<thing>` (e.g. `wiresprite-sp648e`, `wiresprite-doorbell`) so the family is obvious from any topic or log line.
 
 Tradeoffs accepted:
@@ -21,7 +21,7 @@ Tradeoffs accepted:
 
 ## How to add a new device
 
-1. Source the creds locally: `source ~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env`
+1. Source the creds locally: `source ~/.secrets/ha-noisebridge-mqtt.env`
 2. Configure the device's MQTT client with `MQTT_USER` / `MQTT_PASS` from that file, broker at `10.21.0.43:1883` (or whatever `homeassistant.local` resolves to on the LAN).
 3. Publish an HA MQTT-discovery message on `homeassistant/<component>/<unique_id>/config` (retained) so HA auto-creates the entity. See [HA MQTT discovery docs](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery).
 4. Optionally add the device to `docs/iot-inventory.md` (TODO file) so we know what's on the broker.
@@ -38,5 +38,5 @@ Tradeoffs accepted:
 ## Rotating credentials
 
 1. Change the password on the `wiresprite` user in HA (Settings → People → Users).
-2. Update `~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env`.
+2. Update `~/.secrets/ha-noisebridge-mqtt.env`.
 3. Push updated creds to every device that uses them (each device project should document its own redeploy step).

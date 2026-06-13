@@ -7,8 +7,8 @@ import sys
 import urllib.request
 from datetime import datetime, timezone
 
-# Load HA config from .ha_env
-HA_ENV = "/home/nthmost/.claude/projects/-home-nthmost-projects-sysadmin/.ha_env"
+# Load HA config from .ha_env (set HA_ENV env var to override)
+HA_ENV = os.environ.get("HA_ENV", os.path.expanduser("~/.ha_env"))
 ha_config = {}
 with open(HA_ENV) as f:
     for line in f:

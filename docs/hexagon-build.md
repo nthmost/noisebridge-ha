@@ -70,7 +70,7 @@ All Noisebridge IoT bridges use a single shared HA user called **`wiresprite`** 
 
 Full pattern doc: [iot-device-accounts.md](iot-device-accounts.md).
 
-Credentials live in `~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env` on the master Mac (gitignored, synced to relevant hosts via the systems rsync).
+Credentials live in `~/.secrets/ha-noisebridge-mqtt.env` on the master Mac (gitignored, synced to relevant hosts via the systems rsync).
 
 ## SP648E protocol (what we ported)
 
@@ -114,7 +114,7 @@ Via HA UI: `Lights` dashboard → Front Entrance tab. Color preset tiles set Sol
 
 Via MQTT one-liner:
 ```bash
-source ~/projects/nthmost-systems/.secrets/ha-noisebridge-mqtt.env
+source ~/.secrets/ha-noisebridge-mqtt.env
 mosquitto_pub -h "$MQTT_HOST" -u "$MQTT_USER" -P "$MQTT_PASS" \
   -t 'sp648e/wiresprite_hexagon/set' \
   -m '{"state":"ON","effect":"Rainbow"}'

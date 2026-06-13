@@ -21,8 +21,7 @@ beyla is rebuilt or moved.
 ## Deployment expectations
 
 The systemd unit files in each subdir reflect the paths they currently
-run from on beyla — typically `/home/nthmost/<script>.py` or
-`/home/nthmost/projects/claude_sandbox/<script>.py`. **If you redeploy
+run from on beyla — typically `/home/nthmost/projects/<service>/`. **If you redeploy
 on another host (or move things on beyla), update the `ExecStart` paths
 in the .service unit and copy the updated unit to `/etc/systemd/system/`,
 then `systemctl daemon-reload && systemctl enable --now <service>`.**
@@ -33,9 +32,3 @@ Secrets are never in this repo:
   [donation-alerts/.env.example](donation-alerts/.env.example) for the
   expected keys.
 
-## Known drift caveat
-
-These files were pulled fresh from beyla on 2026-05-20 to capture the
-running production state. Going forward, edits should happen in the repo
-and be deployed from here — not edited live and (hopefully) round-tripped
-back. There's no deploy script yet; see the top-level repo TODO.

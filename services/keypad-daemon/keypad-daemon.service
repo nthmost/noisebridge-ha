@@ -5,8 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/home/nthmost/projects/claude_sandbox/keypad-venv/bin/python -u /home/nthmost/projects/claude_sandbox/keypad_daemon.py
-WorkingDirectory=/home/nthmost/projects/claude_sandbox
+ExecStart=/home/nthmost/projects/keypad-daemon/keypad-venv/bin/python -u /home/nthmost/projects/keypad-daemon/keypad_daemon.py
+WorkingDirectory=/home/nthmost/projects/keypad-daemon
 Restart=on-failure
 RestartSec=5
 
@@ -18,7 +18,7 @@ NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
 PrivateTmp=yes
-ReadOnlyPaths=/home/nthmost/projects/claude_sandbox
+ReadOnlyPaths=/home/nthmost/projects/keypad-daemon
 
 [Install]
 WantedBy=multi-user.target
