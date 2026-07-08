@@ -50,8 +50,8 @@
         value_template: '{{ repeat.index <= 5 }}'
       - condition: template
         value_template: '{% set target = ''on'' if trigger.id == ''opened'' else ''off''
-          %}{{ not (states(''switch.rna_sw1_3rd_reality_zigbee'')
-          == target and states(''switch.rna_sw2_3rd_reality_zigbee'') == target) }}'
+          %}{{ not (states(''switch.rna_sw1_3rd_reality_zigbee'') == target and states(''switch.rna_sw2_3rd_reality_zigbee'')
+          == target) }}'
       sequence:
       - choose:
         - conditions:

@@ -106,6 +106,65 @@
                   }
                 }
               ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Test Squares",
+                  "entities": [
+                    {
+                      "entity": "input_number.ft_test_duration",
+                      "name": "Duration"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Red",
+                      "icon": "mdi:square",
+                      "icon_height": "36px",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.ft_test_red"
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Green",
+                      "icon": "mdi:square",
+                      "icon_height": "36px",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.ft_test_green"
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Blue",
+                      "icon": "mdi:square",
+                      "icon_height": "36px",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.ft_test_blue"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "name": "Show Donate QR",
+              "icon": "mdi:qrcode",
+              "tap_action": {
+                "action": "call-service",
+                "service": "script.ft_send_qr"
+              }
             }
           ]
         },

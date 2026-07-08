@@ -108,6 +108,29 @@
                   }
                 }
               ]
+            },
+            {
+              "type": "entities",
+              "entities": [
+                {
+                  "entity": "sensor.brother_hl_l8360cdw_series_bk",
+                  "name": "BK"
+                },
+                "sensor.brother_hl_l8360cdw_series",
+                {
+                  "entity": "sensor.brother_hl_l8360cdw_series_c",
+                  "name": "C"
+                },
+                {
+                  "entity": "sensor.brother_hl_l8360cdw_series_m",
+                  "name": "M"
+                },
+                {
+                  "entity": "sensor.brother_hl_l8360cdw_series_y",
+                  "name": "Y"
+                }
+              ],
+              "title": "Brother HL-L8360CDW series"
             }
           ]
         },
@@ -212,9 +235,29 @@
               ]
             },
             {
-              "type": "markdown",
-              "title": "Zikzak Streams",
-              "content": "{% set src = state_attr('sensor.zikzak_icecast', 'source') %}\n{% if src %}\n{% for s in src %}\n**{{ s.listenurl.split('/')[-1] }}** \u2014 {{ s.listeners }} listeners  \n{{ s.title }}  \n\n{% endfor %}\n{% else %}*No streams*{% endif %}"
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "button",
+                  "name": "Restart CRT Wall",
+                  "icon": "mdi:television-classic",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "button.press",
+                    "target": {
+                      "entity_id": "button.crt_wall"
+                    }
+                  },
+                  "hold_action": {
+                    "action": "none"
+                  }
+                },
+                {
+                  "type": "markdown",
+                  "title": "Zikzak Streams",
+                  "content": "{% set src = state_attr('sensor.zikzak_icecast', 'source') %}\n{% if src %}\n{% for s in src %}\n**{{ s.listenurl.split('/')[-1] }}** — {{ s.listeners }} listeners  \n{{ s.title }}  \n\n{% endfor %}\n{% else %}*No streams*{% endif %}"
+                }
+              ]
             }
           ]
         },
